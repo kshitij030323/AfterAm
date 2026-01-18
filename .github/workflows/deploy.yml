@@ -33,101 +33,63 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Trigger Render deploy (optional - uncomment if you have deploy hook)
-      # - name: Deploy to Render
-      #   run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
-
-  # Build and deploy Admin Panel to GitHub Pages
-  build-admin:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: admin/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./admin
-        run: npm ci
-
-      - name: Build
-        working-directory: ./admin
-        env:
-          VITE_API_URL: ${{ vars.BACKEND_URL || 'https://afterhour-backend.onrender.com' }}
-        run: npm run build
-
-      - name: Upload admin artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          name: admin-pages
-          path: ./admin/dist
-
-  # Build and deploy Scanner Portal to GitHub Pages
-  build-scanner:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: scanner/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./scanner
-        run: npm ci
-
-      - name: Build
-        working-directory: ./scanner
-        env:
-          VITE_API_URL: ${{ vars.BACKEND_URL || 'https://afterhour-backend.onrender.com' }}
-        run: npm run build
-
-      - name: Upload scanner artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          name: scanner-pages
-          path: ./scanner/dist
-
-  # Deploy to GitHub Pages
-  deploy-pages:
-    needs: [build-admin, build-scanner]
+  # Build Admin and Scanner, then deploy to GitHub Pages
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Download admin artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: admin-pages
-          path: ./combined/admin
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Download scanner artifact
-        uses: actions/download-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: scanner-pages
-          path: ./combined/scanner
+          node-version: '20'
 
-      - name: Create index redirect
+      # Build Admin
+      - name: Install admin dependencies
+        working-directory: ./admin
+        run: npm ci
+
+      - name: Build admin
+        working-directory: ./admin
+        env:
+          VITE_API_URL: https://afterhour-backend-latest.onrender.com
+        run: npm run build
+
+      # Build Scanner
+      - name: Install scanner dependencies
+        working-directory: ./scanner
+        run: npm ci
+
+      - name: Build scanner
+        working-directory: ./scanner
+        env:
+          VITE_API_URL: https://afterhour-backend-latest.onrender.com
+        run: npm run build
+
+      # Combine outputs
+      - name: Prepare deployment folder
         run: |
-          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=admin/"></head><body><a href="admin/">Admin Panel</a> | <a href="scanner/">Scanner Portal</a></body></html>' > ./combined/index.html
+          mkdir -p ./deploy/admin
+          mkdir -p ./deploy/scanner
+          cp -r ./admin/dist/* ./deploy/admin/
+          cp -r ./scanner/dist/* ./deploy/scanner/
+          echo '<!DOCTYPE html><html><head><title>AfterHour</title><style>body{font-family:system-ui;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#0a0a0a;color:#fff;flex-direction:column;gap:20px}a{color:#a855f7;font-size:1.5rem;text-decoration:none;padding:15px 30px;border:2px solid #a855f7;border-radius:10px}a:hover{background:#a855f7;color:#fff}</style></head><body><h1>AfterHour Portals</h1><a href="admin/">Admin Panel</a><a href="scanner/">Scanner Portal</a></body></html>' > ./deploy/index.html
 
-      - name: Upload combined artifact
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./combined
+          path: ./deploy
 
       - name: Deploy to GitHub Pages
         id: deployment
