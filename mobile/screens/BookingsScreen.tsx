@@ -49,7 +49,7 @@ export function BookingsScreen({ navigation }: any) {
             }
 
             // Fetch from API
-            const response = await fetch('http://192.168.1.9:3001/api/bookings/my', {
+            const response = await fetch('https://afterhour-backend-latest.onrender.com/api/bookings/my', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },

@@ -107,7 +107,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                 return;
             }
 
-            const response = await fetch('http://192.168.1.9:3001/api/bookings', {
+            const response = await fetch('https://afterhour-backend-latest.onrender.com/api/bookings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

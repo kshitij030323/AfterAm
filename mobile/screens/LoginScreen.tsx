@@ -5,7 +5,6 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    Alert,
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
@@ -15,8 +14,7 @@ import { Video, ResizeMode } from 'expo-av';
 import { User, ChevronLeft } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
-import { auth, signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential } from '../lib/firebase';
-import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+import auth from '@react-native-firebase/auth';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,8 +26,7 @@ export function LoginScreen() {
     const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [verificationId, setVerificationId] = useState('');
-    const recaptchaVerifier = useRef<FirebaseRecaptchaVerifierModal>(null);
+    const [confirm, setConfirm] = useState<any>(null);
 
     // Format phone for display
     const formatPhoneDisplay = (value: string) => {
@@ -56,12 +53,8 @@ export function LoginScreen() {
 
         try {
             const fullPhone = `+91${phone}`;
-            const phoneProvider = new PhoneAuthProvider(auth);
-            const verId = await phoneProvider.verifyPhoneNumber(
-                fullPhone,
-                recaptchaVerifier.current!
-            );
-            setVerificationId(verId);
+            const confirmation = await auth().signInWithPhoneNumber(fullPhone);
+            setConfirm(confirmation);
             setStep('otp');
         } catch (err: any) {
             console.error('OTP Error:', err);
@@ -81,8 +74,7 @@ export function LoginScreen() {
         setError('');
 
         try {
-            const credential = PhoneAuthProvider.credential(verificationId, otp);
-            await signInWithCredential(auth, credential);
+            await confirm.confirm(otp);
 
             // Check if user exists in AsyncStorage (returning user)
             const existingUsers = JSON.parse(await AsyncStorage.getItem('afterhour_users') || '{}');
@@ -106,7 +98,6 @@ export function LoginScreen() {
     };
 
     const handleNameSubmit = async () => {
-        console.log('handleNameSubmit called, name:', name);
         if (name.trim().length < 2) {
             setError('Please enter your name');
             return;
@@ -115,10 +106,9 @@ export function LoginScreen() {
         setLoading(true);
         try {
             const fullPhone = `+91${phone}`;
-            console.log('Calling backend API for phone auth:', fullPhone);
 
             // Register/login user via backend API
-            const response = await fetch('http://192.168.1.9:3001/api/auth/phone-auth', {
+            const response = await fetch('https://afterhour-backend-latest.onrender.com/api/auth/phone-auth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,20 +119,21 @@ export function LoginScreen() {
                 }),
             });
 
-            console.log('Backend response status:', response.status);
-
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.error || 'Registration failed');
             }
 
             const data = await response.json();
-            console.log('Backend response data:', data);
 
             // Save token and user data
             await AsyncStorage.setItem('afterhour_token', data.token);
             await AsyncStorage.setItem('afterhour_current_user', JSON.stringify(data.user));
-            console.log('Token saved successfully');
+
+            // Also save to users cache
+            const existingUsers = JSON.parse(await AsyncStorage.getItem('afterhour_users') || '{}');
+            existingUsers[fullPhone] = { ...data.user, phone: fullPhone, name: name.trim() };
+            await AsyncStorage.setItem('afterhour_users', JSON.stringify(existingUsers));
 
             setUser({ phone: fullPhone, name: name.trim(), id: data.user.id });
         } catch (err) {
@@ -171,12 +162,6 @@ export function LoginScreen() {
                 isMuted
             />
             <View style={styles.videoOverlay} />
-
-            <FirebaseRecaptchaVerifierModal
-                ref={recaptchaVerifier}
-                firebaseConfig={auth.app.options}
-                attemptInvisibleVerification={true}
-            />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

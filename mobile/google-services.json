@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "802683658779",
+    "project_id": "afterhours-bd73e",
+    "storage_bucket": "afterhours-bd73e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:802683658779:android:71ac3bba470fcbf2cc0ebe",
+        "android_client_info": {
+          "package_name": "com.kshitijdev02.afterhour"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkGUtrrNFKiWvLkeACeM99y-hJb2q4ETA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

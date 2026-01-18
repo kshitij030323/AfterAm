@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Backend API URL - use your computer's IP for mobile device access
-const API_BASE = 'http://192.168.1.9:3001/api';
+const API_BASE = 'https://afterhour-backend-latest.onrender.com/api';
 
 interface ApiOptions {
     method?: string;

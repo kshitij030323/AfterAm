@@ -39,7 +39,7 @@ export function ClubDetailScreen({ route, navigation }: any) {
     const fetchEvents = useCallback(async () => {
         try {
             const token = await AsyncStorage.getItem('afterhour_token');
-            const response = await fetch('http://192.168.1.9:3001/api/events', {
+            const response = await fetch('https://afterhour-backend-latest.onrender.com/api/events', {
                 headers: token ? { 'Authorization': `Bearer ${token}` } : {},
             });
 
