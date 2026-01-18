@@ -1,0 +1,90 @@
+// Prisma Schema for AfterHour App
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  password  String?
+  name      String
+  phone     String   @unique
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+}
+
+model Club {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  location    String   // Short location (e.g., "Kalyan Nagar, Bangalore")
+  address     String?  // Full address (e.g., "30, 4th Floor, CMR Main Road...")
+  mapUrl      String?
+  description String?
+  imageUrl    String
+  email       String?  @unique
+  password    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events          Event[]
+  scannedBookings Booking[] @relation("ScannedBy")
+}
+
+model Event {
+  id               String   @id @default(uuid())
+  title            String
+  clubId           String?
+  club             String   // Keep for backward compatibility
+  location         String
+  description      String
+  rules            String?
+  genre            String
+  imageUrl         String   // Keep for backward compatibility (same as bannerUrl)
+  bannerUrl        String?  // Static image for cards (if different from imageUrl)
+  videoUrl         String?  // Hero video URL
+  gallery          String[] // Array of gallery image URLs
+  price            Float    @default(0)
+  priceLabel       String   @default("Free Entry")
+  date             DateTime
+  startTime        String
+  endTime          String
+  guestlistStatus  String   @default("open") // "open", "closing", "closed"
+  guestlistLimit   Int?     // Max capacity, null = unlimited
+  closingThreshold Int?     // When spots remaining <= this, auto switch to "closing"
+  guestlistCloseTime String? // Specific time to close guestlist (e.g. "18:00")
+  guestlistCloseOnStart Boolean @default(true) // Auto-close guestlist when event starts
+  featured         Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  clubRef  Club?     @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  bookings Booking[]
+}
+
+model Booking {
+  id              String    @id @default(uuid())
+  userId          String
+  eventId         String
+  couples         Int       @default(0)
+  ladies          Int       @default(0)
+  stags           Int       @default(0)
+  guests          Json?     // Array of { name, gender: 'male'|'female'|'couple' }
+  status          String    @default("confirmed")
+  qrCode          String    @unique @default(uuid())
+  createdAt       DateTime  @default(now())
+  scannedAt       DateTime?
+  scannedByClubId String?
+
+  user          User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event         Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  scannedByClub Club? @relation("ScannedBy", fields: [scannedByClubId], references: [id], onDelete: SetNull)
+}
