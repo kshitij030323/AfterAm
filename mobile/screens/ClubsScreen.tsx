@@ -8,6 +8,8 @@ import {
     SafeAreaView,
     RefreshControl,
     Image,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MapPin, ChevronRight } from 'lucide-react-native';
@@ -132,7 +134,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 20,
-        paddingTop: 20,
+        paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 20 : 20,
         paddingBottom: 16,
     },
     title: {

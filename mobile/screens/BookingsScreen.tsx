@@ -7,6 +7,8 @@ import {
     TouchableOpacity,
     SafeAreaView,
     RefreshControl,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ticket, CheckCircle } from 'lucide-react-native';
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: 20,
-        paddingTop: 16,
+        paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 16,
     },
     title: {
         fontSize: 28,

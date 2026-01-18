@@ -11,6 +11,8 @@ import {
     TextInput,
     Switch,
     Linking,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { ChevronRight, LogOut, X, Bell, User, HelpCircle, FileText, Shield } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -322,7 +324,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: 20,
-        paddingTop: 16,
+        paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 16,
     },
     title: {
         fontSize: 28,

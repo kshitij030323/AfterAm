@@ -11,6 +11,8 @@ import {
     TextInput,
     SafeAreaView,
     ActivityIndicator,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { MapPin, Search, Clock } from 'lucide-react-native';
@@ -271,7 +273,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 16,
         paddingBottom: 16,
     },
     locationLabel: {

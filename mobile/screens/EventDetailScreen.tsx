@@ -12,6 +12,8 @@ import {
     Alert,
     Modal,
     FlatList,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { Video, ResizeMode, Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -414,7 +416,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginLeft: 16,
-        marginTop: 8,
+        marginTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 8 : 8,
     },
     titleContainer: {
         position: 'absolute',
