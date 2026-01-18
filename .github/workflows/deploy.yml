@@ -60,7 +60,7 @@ jobs:
       - name: Build admin
         working-directory: ./admin
         env:
-          VITE_API_URL: https://afterhour-backend-latest.onrender.com
+          VITE_API_URL: https://afterhour-backend-latest.onrender.com/api
         run: npm run build
 
       # Build Scanner
@@ -71,7 +71,7 @@ jobs:
       - name: Build scanner
         working-directory: ./scanner
         env:
-          VITE_API_URL: https://afterhour-backend-latest.onrender.com
+          VITE_API_URL: https://afterhour-backend-latest.onrender.com/api
         run: npm run build
 
       # Combine outputs
