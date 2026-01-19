@@ -147,7 +147,7 @@ export function ConfirmationScreen({ route, navigation }: any) {
                     style={styles.viewShot}
                 >
                     <View style={styles.shareableArea}>
-                        <Text style={styles.shareTitle}>🎉 Booked on AfterHour!</Text>
+                        <Text style={styles.shareTitle}>🎉 Booked on Clubin!</Text>
                         <View style={styles.ticket}>
                             <View style={styles.ticketNotch} />
                             <View style={styles.ticketNotchBottom} />

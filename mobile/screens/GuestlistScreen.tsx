@@ -13,6 +13,7 @@ import {
     TextInput,
     KeyboardAvoidingView,
     Platform,
+    StatusBar,
 } from 'react-native';
 import { ChevronLeft, Info, Minus, Plus, X, User } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -33,10 +34,30 @@ interface Guest {
     type: 'couple' | 'lady' | 'stag';
 }
 
+// Gender Symbol Components
+const MaleSymbol = () => (
+    <View style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 28, color: '#3B82F6', fontWeight: '700' }}>♂</Text>
+    </View>
+);
+
+const FemaleSymbol = () => (
+    <View style={{ width: 32, height: 32, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 28, color: '#EC4899', fontWeight: '700' }}>♀</Text>
+    </View>
+);
+
+const CoupleSymbol = () => (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={{ fontSize: 24, color: '#EC4899', fontWeight: '700' }}>♀</Text>
+        <Text style={{ fontSize: 24, color: '#3B82F6', fontWeight: '700', marginLeft: -4 }}>♂</Text>
+    </View>
+);
+
 const GUEST_TYPES = [
-    { key: 'couples', label: 'Couples', sub: 'Free entry till 9:30 PM', icon: '👫' },
-    { key: 'ladies', label: 'Ladies', sub: 'Free entry all night', icon: '💃' },
-    { key: 'stags', label: 'Stags (Male)', sub: 'Cover charge applies', icon: '🕺' },
+    { key: 'couples', label: 'Couples', sub: 'Free entry till 9:30 PM', IconComponent: CoupleSymbol },
+    { key: 'ladies', label: 'Ladies', sub: 'Free entry all night', IconComponent: FemaleSymbol },
+    { key: 'stags', label: 'Stags (Male)', sub: 'Cover charge applies', IconComponent: MaleSymbol },
 ] as const;
 
 export function GuestlistScreen({ route, navigation }: any) {
@@ -150,9 +171,9 @@ export function GuestlistScreen({ route, navigation }: any) {
     };
 
     const getGuestIcon = (guest: Guest) => {
-        if (guest.type === 'couple') return '👫';
-        if (guest.type === 'lady') return '💃';
-        return '🕺';
+        if (guest.type === 'couple') return <CoupleSymbol />;
+        if (guest.type === 'lady') return <FemaleSymbol />;
+        return <MaleSymbol />;
     };
 
     return (
@@ -180,7 +201,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                     {GUEST_TYPES.map((type) => (
                         <View key={type.key} style={styles.counterRow}>
                             <View style={styles.counterInfo}>
-                                <Text style={styles.counterIcon}>{type.icon}</Text>
+                                <type.IconComponent />
                                 <View>
                                     <Text style={styles.counterLabel}>{type.label}</Text>
                                     <Text style={styles.counterSub}>{type.sub}</Text>
@@ -262,7 +283,7 @@ export function GuestlistScreen({ route, navigation }: any) {
 
                             {guests.map((guest, index) => (
                                 <View key={index} style={styles.nameInputRow}>
-                                    <Text style={styles.nameIcon}>{getGuestIcon(guest)}</Text>
+                                    <View style={styles.nameIcon}>{getGuestIcon(guest)}</View>
                                     <View style={styles.nameInputContainer}>
                                         <Text style={styles.nameLabel}>{getGuestLabel(guest, index)}</Text>
                                         <TextInput
@@ -308,6 +329,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 16,
+        paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 16,
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(255,255,255,0.05)',
     },
@@ -437,7 +459,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         padding: 20,
-        paddingBottom: 36,
+        paddingBottom: Platform.OS === 'android' ? 100 : 36,
         backgroundColor: '#0a0a0a',
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.05)',
