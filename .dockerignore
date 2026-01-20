@@ -1,0 +1,8 @@
+node_modules
+.git
+*.md
+*.log
+.env*
+dist
+.DS_Store
+lv_0_*.mp4

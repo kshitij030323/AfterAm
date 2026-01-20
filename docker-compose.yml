@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    image: kshitijgupta2/clubin-backend:latest
+    container_name: clubin-backend
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DATABASE_URL=postgresql://afterhour_user:Oksana@1215#@host.docker.internal:5432/afterhour
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  frontend:
+    image: kshitijgupta2/clubin-frontend:latest
+    container_name: clubin-frontend
+    ports:
+      - "3004:3004"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  default:
+    name: clubin-network
