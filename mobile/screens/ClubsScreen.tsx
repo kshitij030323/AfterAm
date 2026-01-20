@@ -32,7 +32,7 @@ export function ClubsScreen({ navigation }: any) {
     const fetchClubs = useCallback(async () => {
         try {
             const token = await AsyncStorage.getItem('afterhour_token');
-            const response = await fetch('https://afterhour-backend-latest.onrender.com/api/clubs', {
+            const response = await fetch('https://api.clubin.info/api/clubs', {
                 headers: token ? { 'Authorization': `Bearer ${token}` } : {},
             });
 

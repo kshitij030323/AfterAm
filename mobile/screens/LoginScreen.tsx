@@ -108,7 +108,7 @@ export function LoginScreen() {
             const fullPhone = `+91${phone}`;
 
             // Register/login user via backend API
-            const response = await fetch('https://afterhour-backend-latest.onrender.com/api/auth/phone-auth', {
+            const response = await fetch('https://api.clubin.info/api/auth/phone-auth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "AfterHour",
-    "slug": "afterhour",
+    "slug": "clubin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,12 +27,13 @@
     },
     "extra": {
       "eas": {
-        "projectId": "76d0dd0a-469e-443f-96f3-a11af9e27e3b"
+        "projectId": "0b01bc4f-53bc-4962-80a3-553c330626d1"
       }
     },
     "plugins": [
       "@react-native-firebase/app",
       "@react-native-firebase/auth"
-    ]
+    ],
+    "owner": "hacker67s-organization"
   }
 }

@@ -128,7 +128,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                 return;
             }
 
-            const response = await fetch('https://afterhour-backend-latest.onrender.com/api/bookings', {
+            const response = await fetch('https://api.clubin.info/api/bookings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

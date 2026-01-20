@@ -88,7 +88,7 @@ export function ConfirmationScreen({ route, navigation }: any) {
                         setCancelling(true);
                         try {
                             const token = await AsyncStorage.getItem('afterhour_token');
-                            const response = await fetch(`https://afterhour-backend-latest.onrender.com/api/bookings/${booking.id}`, {
+                            const response = await fetch(`https://api.clubin.info/api/bookings/${booking.id}`, {
                                 method: 'DELETE',
                                 headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                             });

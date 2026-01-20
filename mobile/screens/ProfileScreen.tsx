@@ -54,7 +54,7 @@ export function ProfileScreen() {
         if (editName.trim() && updateUser) {
             try {
                 const token = await AsyncStorage.getItem('afterhour_token');
-                const response = await fetch('https://afterhour-backend-latest.onrender.com/api/auth/update-profile', {
+                const response = await fetch('https://api.clubin.info/api/auth/update-profile', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
