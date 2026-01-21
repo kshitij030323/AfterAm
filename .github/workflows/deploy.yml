@@ -59,7 +59,7 @@ jobs:
             kshitijgupta2/clubin-frontend:latest
             kshitijgupta2/clubin-frontend:${{ github.sha }}
           build-args: |
-            VITE_API_URL=https://clubin.info/api
+            VITE_API_URL=/api
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

@@ -12,8 +12,8 @@ RUN npm ci
 # Copy admin source
 COPY admin/ ./
 
-# Build admin with API URL
-ARG VITE_API_URL=https://clubin.info/api
+# Build admin with API URL (relative since nginx proxies /api to backend)
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
@@ -32,8 +32,8 @@ RUN npm ci
 # Copy scanner source
 COPY scanner/ ./
 
-# Build scanner with API URL
-ARG VITE_API_URL=https://clubin.info/api
+# Build scanner with API URL (relative since nginx proxies /api to backend)
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
