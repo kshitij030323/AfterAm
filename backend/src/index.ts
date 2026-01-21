@@ -6,7 +6,7 @@ import { eventsRouter } from './routes/events.js';
 import { bookingsRouter } from './routes/bookings.js';
 import { clubsRouter } from './routes/clubs.js';
 import { scannerRouter } from './routes/scanner.js';
-import uploadRouter from './routes/upload.js';
+import uploadRouter, { checkR2Connection } from './routes/upload.js';
 
 dotenv.config();
 
@@ -42,7 +42,10 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
     res.status(500).json({ error: 'Something went wrong!' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`🚀 AfterHour API running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
+
+    // Check R2 connection at startup
+    await checkR2Connection();
 });

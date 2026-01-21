@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, HeadBucketCommand } from '@aws-sdk/client-s3';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -33,6 +33,29 @@ const s3Client = new S3Client({
 
 const bucketName = process.env.R2_BUCKET_NAME || 'afterhour-media';
 const publicUrl = process.env.R2_PUBLIC_URL || '';
+
+// Check R2 bucket connection at startup
+export async function checkR2Connection(): Promise<boolean> {
+    try {
+        console.log('🔗 Checking Cloudflare R2 connection...');
+        console.log(`   Bucket: ${bucketName}`);
+        console.log(`   Endpoint: https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`);
+
+        const command = new HeadBucketCommand({ Bucket: bucketName });
+        await s3Client.send(command);
+
+        console.log('✅ R2 bucket connection successful!');
+        console.log(`   Public URL: ${publicUrl}`);
+        return true;
+    } catch (error: any) {
+        console.error('❌ R2 bucket connection failed!');
+        console.error(`   Error: ${error.message}`);
+        if (error.name === 'NotFound') {
+            console.error('   Bucket does not exist or access denied');
+        }
+        return false;
+    }
+}
 
 // Upload single file
 router.post('/', upload.single('file'), async (req: any, res: Response) => {
