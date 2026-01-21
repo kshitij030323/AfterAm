@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, MapPin, Upload, Loader2 } from 'lucide-react';
 import { getClub, createClub, updateClub, ClubInput } from '../lib/api';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 export function ClubForm() {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -72,7 +74,7 @@ export function ClubForm() {
             const formDataUpload = new FormData();
             formDataUpload.append('file', file);
 
-            const response = await fetch('http://localhost:3001/api/upload', {
+            const response = await fetch(`${API_BASE}/upload`, {
                 method: 'POST',
                 body: formDataUpload,
             });

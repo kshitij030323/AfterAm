@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { MapPin, ChevronRight } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ClubsScreenSkeleton } from '../components/SkeletonLoader';
+import { AppBackground } from '../components/AppBackground';
 
 // Club type derived from events
 interface Club {
@@ -89,48 +90,54 @@ export function ClubsScreen({ navigation }: any) {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Clubs</Text>
-                <Text style={styles.subtitle}>Find your favorite venues</Text>
-            </View>
+        <View style={styles.container}>
+            <AppBackground />
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Clubs</Text>
+                    <Text style={styles.subtitle}>Find your favorite venues</Text>
+                </View>
 
-            <FlatList
-                data={clubs}
-                renderItem={renderClubCard}
-                keyExtractor={(item) => item.name}
-                contentContainerStyle={styles.list}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={() => {
-                            setRefreshing(true);
-                            fetchClubs();
-                        }}
-                        tintColor="#a855f7"
-                    />
-                }
-                ListEmptyComponent={
-                    loading ? (
-                        <ClubsScreenSkeleton />
-                    ) : (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyIcon}>🏠</Text>
-                            <Text style={styles.emptyTitle}>No clubs found</Text>
-                            <Text style={styles.emptyText}>Check back later for venues</Text>
-                        </View>
-                    )
-                }
-            />
-        </SafeAreaView>
+                <FlatList
+                    data={clubs}
+                    renderItem={renderClubCard}
+                    keyExtractor={(item) => item.name}
+                    contentContainerStyle={styles.list}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => {
+                                setRefreshing(true);
+                                fetchClubs();
+                            }}
+                            tintColor="#a855f7"
+                        />
+                    }
+                    ListEmptyComponent={
+                        loading ? (
+                            <ClubsScreenSkeleton />
+                        ) : (
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyIcon}>🏠</Text>
+                                <Text style={styles.emptyTitle}>No clubs found</Text>
+                                <Text style={styles.emptyText}>Check back later for venues</Text>
+                            </View>
+                        )
+                    }
+                />
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#0a0a12',
+    },
+    safeArea: {
+        flex: 1,
     },
     header: {
         paddingHorizontal: 20,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Home, Ticket, User, MapPinPlus } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AuthProvider, useAuth } from './lib/auth';
 import { HomeScreen } from './screens/HomeScreen';
@@ -17,6 +18,7 @@ import { ProfileScreen } from './screens/ProfileScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { ClubsScreen } from './screens/ClubsScreen';
 import { ClubDetailScreen } from './screens/ClubDetailScreen';
+import { OnboardingScreen } from './screens/OnboardingScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -142,14 +144,42 @@ function MainTabs() {
 
 function AppNavigator() {
   const { user } = useAuth();
+  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
 
-  // Show login screen if user is not logged in
+  useEffect(() => {
+    checkOnboardingStatus();
+  }, []);
+
+  const checkOnboardingStatus = async () => {
+    try {
+      const completed = await AsyncStorage.getItem('clubin_onboarding_complete');
+      setShowOnboarding(completed !== 'true');
+    } catch {
+      setShowOnboarding(true);
+    }
+  };
+
+  // Loading state while checking onboarding status
+  if (showOnboarding === null) {
+    return (
+      <View style={styles.container}>
+        <StatusBar style="light" />
+      </View>
+    );
+  }
+
+  // Show onboarding for new users
+  if (showOnboarding) {
+    return (
+      <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
+    );
+  }
+
+  // Show login if user is not authenticated
   if (!user) {
     return (
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-        </Stack.Navigator>
+        <LoginScreen />
       </NavigationContainer>
     );
   }

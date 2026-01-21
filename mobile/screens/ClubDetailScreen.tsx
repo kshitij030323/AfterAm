@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, MapPin, Calendar, Clock } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ClubDetailEventsSkeleton } from '../components/SkeletonLoader';
+import { AppBackground } from '../components/AppBackground';
 
 const { width, height } = Dimensions.get('window');
 
@@ -110,6 +111,7 @@ export function ClubDetailScreen({ route, navigation }: any) {
 
     return (
         <View style={styles.container}>
+            <AppBackground />
             {/* Hero Header with Gradient Fade */}
             <View style={styles.hero}>
                 <Image source={{ uri: club.imageUrl }} style={styles.heroImage} />
@@ -168,7 +170,7 @@ export function ClubDetailScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#0a0a12',
     },
     hero: {
         height: height * 0.4,

@@ -19,6 +19,7 @@ import { MapPin, Search, Clock } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getEvents, Event } from '../lib/api';
 import { HomeScreenSkeleton } from '../components/SkeletonLoader';
+import { AppBackground } from '../components/AppBackground';
 
 const CATEGORIES = [
     { id: 'all', label: 'All' },
@@ -167,109 +168,115 @@ export function HomeScreen({ navigation }: any) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <View>
-                    <Text style={styles.locationLabel}>LOCATION</Text>
-                    <View style={styles.locationRow}>
-                        <MapPin color="#a855f7" size={20} />
-                        <Text style={styles.locationText}>Bengaluru</Text>
+        <View style={styles.container}>
+            <AppBackground />
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <View>
+                        <Text style={styles.locationLabel}>LOCATION</Text>
+                        <View style={styles.locationRow}>
+                            <MapPin color="#a855f7" size={20} />
+                            <Text style={styles.locationText}>Bengaluru</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
 
-            <View style={styles.searchContainer}>
-                <Search color="#737373" size={20} />
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search clubs, DJs, or genres..."
-                    placeholderTextColor="#737373"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                />
-            </View>
+                <View style={styles.searchContainer}>
+                    <Search color="#737373" size={20} />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search clubs, DJs, or genres..."
+                        placeholderTextColor="#737373"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                    />
+                </View>
 
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.categories}
-                contentContainerStyle={styles.categoriesContent}
-            >
-                {CATEGORIES.map((cat) => {
-                    const isActive = selectedCategory === cat.id;
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.categories}
+                    contentContainerStyle={styles.categoriesContent}
+                >
+                    {CATEGORIES.map((cat) => {
+                        const isActive = selectedCategory === cat.id;
 
-                    if (isActive) {
+                        if (isActive) {
+                            return (
+                                <TouchableOpacity
+                                    key={cat.id}
+                                    onPress={() => setSelectedCategory(cat.id)}
+                                    style={styles.categoryButtonContainer}
+                                >
+                                    <BlurView intensity={80} tint="light" style={styles.categoryButtonBlur}>
+                                        <View style={styles.categoryButtonGlass}>
+                                            <Text style={styles.categoryTextActive}>{cat.label}</Text>
+                                        </View>
+                                    </BlurView>
+                                </TouchableOpacity>
+                            );
+                        }
+
                         return (
                             <TouchableOpacity
                                 key={cat.id}
+                                style={styles.categoryButton}
                                 onPress={() => setSelectedCategory(cat.id)}
-                                style={styles.categoryButtonContainer}
                             >
-                                <BlurView intensity={80} tint="light" style={styles.categoryButtonBlur}>
-                                    <View style={styles.categoryButtonGlass}>
-                                        <Text style={styles.categoryTextActive}>{cat.label}</Text>
-                                    </View>
-                                </BlurView>
+                                <Text style={styles.categoryText}>{cat.label}</Text>
                             </TouchableOpacity>
                         );
+                    })}
+                </ScrollView>
+
+                <Text style={styles.sectionTitle}>Trending Tonight</Text>
+
+                <FlatList
+                    data={filteredEvents}
+                    renderItem={renderEventCard}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={filteredEvents.length === 0 ? styles.emptyList : styles.list}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => {
+                                setRefreshing(true);
+                                fetchEvents();
+                            }}
+                            tintColor="#a855f7"
+                        />
                     }
-
-                    return (
-                        <TouchableOpacity
-                            key={cat.id}
-                            style={styles.categoryButton}
-                            onPress={() => setSelectedCategory(cat.id)}
-                        >
-                            <Text style={styles.categoryText}>{cat.label}</Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </ScrollView>
-
-            <Text style={styles.sectionTitle}>Trending Tonight</Text>
-
-            <FlatList
-                data={filteredEvents}
-                renderItem={renderEventCard}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={filteredEvents.length === 0 ? styles.emptyList : styles.list}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={() => {
-                            setRefreshing(true);
-                            fetchEvents();
-                        }}
-                        tintColor="#a855f7"
-                    />
-                }
-                ListEmptyComponent={
-                    loading ? (
-                        <HomeScreenSkeleton />
-                    ) : (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyIcon}>🔍</Text>
-                            <Text style={styles.emptyTitle}>No results found</Text>
-                            <Text style={styles.emptyText}>
-                                {searchQuery
-                                    ? `No events match "${searchQuery}"`
-                                    : 'No events in this category'}
-                            </Text>
-                        </View>
-                    )
-                }
-            />
-        </SafeAreaView>
+                    ListEmptyComponent={
+                        loading ? (
+                            <HomeScreenSkeleton />
+                        ) : (
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyIcon}>🔍</Text>
+                                <Text style={styles.emptyTitle}>No results found</Text>
+                                <Text style={styles.emptyText}>
+                                    {searchQuery
+                                        ? `No events match "${searchQuery}"`
+                                        : 'No events in this category'}
+                                </Text>
+                            </View>
+                        )
+                    }
+                />
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#0a0a12',
+    },
+    safeArea: {
+        flex: 1,
     },
     header: {
         paddingHorizontal: 20,

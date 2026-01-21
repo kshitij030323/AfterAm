@@ -14,6 +14,7 @@ import QRCode from 'react-native-qrcode-svg';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppBackground } from '../components/AppBackground';
 
 // Local Booking type (matches our AsyncStorage format)
 interface LocalBooking {
@@ -128,121 +129,127 @@ export function ConfirmationScreen({ route, navigation }: any) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Success Icon */}
-                <View style={styles.successIcon}>
-                    <CheckCircle color="#fff" size={48} strokeWidth={3} />
-                </View>
+        <View style={styles.container}>
+            <AppBackground />
+            <SafeAreaView style={styles.safeArea}>
+                <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                    {/* Success Icon */}
+                    <View style={styles.successIcon}>
+                        <CheckCircle color="#fff" size={48} strokeWidth={3} />
+                    </View>
 
-                <Text style={styles.title}>You're on the list!</Text>
-                <Text style={styles.subtitle}>
-                    Screenshot this ticket or find it in 'My Bookings'.
-                </Text>
+                    <Text style={styles.title}>You're on the list!</Text>
+                    <Text style={styles.subtitle}>
+                        Screenshot this ticket or find it in 'My Bookings'.
+                    </Text>
 
-                {/* Ticket Card - wrapped in ViewShot for screenshot */}
-                <ViewShot
-                    ref={viewShotRef}
-                    options={{ format: 'png', quality: 1.0 }}
-                    style={styles.viewShot}
-                >
-                    <View style={styles.shareableArea}>
-                        <Text style={styles.shareTitle}>🎉 Booked on Clubin!</Text>
-                        <View style={styles.ticket}>
-                            <View style={styles.ticketNotch} />
-                            <View style={styles.ticketNotchBottom} />
+                    {/* Ticket Card - wrapped in ViewShot for screenshot */}
+                    <ViewShot
+                        ref={viewShotRef}
+                        options={{ format: 'png', quality: 1.0 }}
+                        style={styles.viewShot}
+                    >
+                        <View style={styles.shareableArea}>
+                            <Text style={styles.shareTitle}>🎉 Booked on Clubin!</Text>
+                            <View style={styles.ticket}>
+                                <View style={styles.ticketNotch} />
+                                <View style={styles.ticketNotchBottom} />
 
-                            <View style={styles.ticketHeader}>
-                                <Text style={styles.ticketTitle}>{event.title}</Text>
-                                <Text style={styles.ticketClub}>{event.club}</Text>
-                                <View style={styles.ticketMeta}>
-                                    <View style={styles.ticketMetaItem}>
-                                        <Clock color="#737373" size={12} />
-                                        <Text style={styles.ticketMetaText}>{event.time || '21:00'}</Text>
+                                <View style={styles.ticketHeader}>
+                                    <Text style={styles.ticketTitle}>{event.title}</Text>
+                                    <Text style={styles.ticketClub}>{event.club}</Text>
+                                    <View style={styles.ticketMeta}>
+                                        <View style={styles.ticketMetaItem}>
+                                            <Clock color="#737373" size={12} />
+                                            <Text style={styles.ticketMetaText}>{event.time || '21:00'}</Text>
+                                        </View>
+                                        <View style={styles.ticketMetaItem}>
+                                            <Calendar color="#737373" size={12} />
+                                            <Text style={styles.ticketMetaText}>
+                                                {event.date ? new Date(event.date).toLocaleDateString('en-IN', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                }) : 'Today'}
+                                            </Text>
+                                        </View>
                                     </View>
-                                    <View style={styles.ticketMetaItem}>
-                                        <Calendar color="#737373" size={12} />
-                                        <Text style={styles.ticketMetaText}>
-                                            {event.date ? new Date(event.date).toLocaleDateString('en-IN', {
-                                                day: 'numeric',
-                                                month: 'short',
-                                            }) : 'Today'}
+                                </View>
+
+                                <View style={styles.ticketDivider} />
+
+                                {/* QR Code */}
+                                <View style={styles.qrContainer}>
+                                    <View style={styles.qrWrapper}>
+                                        <QRCode
+                                            value={qrData}
+                                            size={140}
+                                            backgroundColor="white"
+                                            color="#000"
+                                        />
+                                    </View>
+                                    <Text style={styles.qrCode}>{bookingCode}</Text>
+                                </View>
+
+                                <View style={styles.ticketDivider} />
+
+                                <View style={styles.ticketFooter}>
+                                    <View>
+                                        <Text style={styles.ticketFooterLabel}>TOTAL GUESTS</Text>
+                                        <Text style={styles.ticketFooterValue}>{totalGuests}</Text>
+                                    </View>
+                                    <View style={{ alignItems: 'flex-end' }}>
+                                        <Text style={styles.ticketFooterLabel}>BOOKING ID</Text>
+                                        <Text style={styles.ticketFooterValue}>
+                                            #AF-{bookingCode.slice(0, 4)}
                                         </Text>
                                     </View>
                                 </View>
                             </View>
-
-                            <View style={styles.ticketDivider} />
-
-                            {/* QR Code */}
-                            <View style={styles.qrContainer}>
-                                <View style={styles.qrWrapper}>
-                                    <QRCode
-                                        value={qrData}
-                                        size={140}
-                                        backgroundColor="white"
-                                        color="#000"
-                                    />
-                                </View>
-                                <Text style={styles.qrCode}>{bookingCode}</Text>
-                            </View>
-
-                            <View style={styles.ticketDivider} />
-
-                            <View style={styles.ticketFooter}>
-                                <View>
-                                    <Text style={styles.ticketFooterLabel}>TOTAL GUESTS</Text>
-                                    <Text style={styles.ticketFooterValue}>{totalGuests}</Text>
-                                </View>
-                                <View style={{ alignItems: 'flex-end' }}>
-                                    <Text style={styles.ticketFooterLabel}>BOOKING ID</Text>
-                                    <Text style={styles.ticketFooterValue}>
-                                        #AF-{bookingCode.slice(0, 4)}
-                                    </Text>
-                                </View>
-                            </View>
                         </View>
+                    </ViewShot>
+
+                    {/* Actions */}
+                    <View style={styles.actions}>
+                        <TouchableOpacity
+                            style={styles.primaryButton}
+                            onPress={() => navigation.navigate('Home', { screen: 'HomeList' })}
+                        >
+                            <Text style={styles.primaryButtonText}>Back to Home</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.secondaryButton} onPress={shareTicket}>
+                            <Share2 color="#fff" size={18} />
+                            <Text style={styles.secondaryButtonText}>Share Ticket</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.cancelButton}
+                            onPress={cancelBooking}
+                            disabled={cancelling}
+                        >
+                            {cancelling ? (
+                                <ActivityIndicator color="#ef4444" size="small" />
+                            ) : (
+                                <>
+                                    <XCircle color="#ef4444" size={18} />
+                                    <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
                     </View>
-                </ViewShot>
-
-                {/* Actions */}
-                <View style={styles.actions}>
-                    <TouchableOpacity
-                        style={styles.primaryButton}
-                        onPress={() => navigation.navigate('Home', { screen: 'HomeList' })}
-                    >
-                        <Text style={styles.primaryButtonText}>Back to Home</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.secondaryButton} onPress={shareTicket}>
-                        <Share2 color="#fff" size={18} />
-                        <Text style={styles.secondaryButtonText}>Share Ticket</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={cancelBooking}
-                        disabled={cancelling}
-                    >
-                        {cancelling ? (
-                            <ActivityIndicator color="#ef4444" size="small" />
-                        ) : (
-                            <>
-                                <XCircle color="#ef4444" size={18} />
-                                <Text style={styles.cancelButtonText}>Cancel Booking</Text>
-                            </>
-                        )}
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#0a0a12',
+    },
+    safeArea: {
+        flex: 1,
     },
     content: {
         padding: 20,

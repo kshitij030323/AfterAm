@@ -4,6 +4,8 @@ import { ChevronLeft, Loader2, Upload } from 'lucide-react';
 import { getEvent, createEvent, updateEvent, EventInput } from '../lib/api';
 import toast from 'react-hot-toast';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 const GENRES = ['Techno', 'Bollywood', 'House', 'Hip-Hop', 'EDM', 'Live', 'Commercial'];
 
 export function EventForm() {
@@ -85,7 +87,7 @@ export function EventForm() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('http://localhost:3001/api/upload', {
+            const response = await fetch(`${API_BASE}/upload`, {
                 method: 'POST',
                 body: formData,
             });
@@ -117,7 +119,7 @@ export function EventForm() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('http://localhost:3001/api/upload', {
+            const response = await fetch(`${API_BASE}/upload`, {
                 method: 'POST',
                 body: formData,
             });
@@ -148,7 +150,7 @@ export function EventForm() {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const response = await fetch('http://localhost:3001/api/upload', {
+                const response = await fetch(`${API_BASE}/upload`, {
                     method: 'POST',
                     body: formData,
                 });

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -9,14 +9,96 @@ import {
     KeyboardAvoidingView,
     Platform,
     Dimensions,
+    Alert,
+    Animated,
+    Easing,
+    Keyboard,
 } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
+import { LinearGradient } from 'expo-linear-gradient';
 import { User, ChevronLeft } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
-import auth from '@react-native-firebase/auth';
+import Constants from 'expo-constants';
+import { AppBackground } from '../components/AppBackground';
+
+// Check if running in Expo Go (development mode)
+const isExpoGo = Constants.appOwnership === 'expo';
+
+// Only import Firebase auth if NOT in Expo Go
+let auth: any = null;
+if (!isExpoGo) {
+    try {
+        auth = require('@react-native-firebase/auth').default;
+    } catch (e) {
+        console.log('Firebase auth not available');
+    }
+}
 
 const { width, height } = Dimensions.get('window');
+
+// Glass card with 3D border effect
+function GlassCard3D({ children, style }: { children: React.ReactNode; style?: any }) {
+    return (
+        <View style={[styles.glassCardOuter, style]}>
+            <View style={styles.glassCardShadow} />
+            <LinearGradient
+                colors={['rgba(88, 28, 135, 0.6)', 'rgba(59, 7, 100, 0.4)', 'rgba(30, 10, 60, 0.3)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.glassCardBorder}
+            >
+                <View style={styles.glassCardInner}>
+                    {children}
+                </View>
+            </LinearGradient>
+        </View>
+    );
+}
+
+// Glass input with 3D border
+function GlassInput3D({
+    value,
+    onChangeText,
+    placeholder,
+    keyboardType = 'default',
+    maxLength,
+    prefix,
+    style,
+    textAlign = 'left',
+}: {
+    value: string;
+    onChangeText: (text: string) => void;
+    placeholder: string;
+    keyboardType?: any;
+    maxLength?: number;
+    prefix?: string;
+    style?: any;
+    textAlign?: 'left' | 'center' | 'right';
+}) {
+    return (
+        <View style={[styles.inputOuter, style]}>
+            <LinearGradient
+                colors={['rgba(88, 28, 135, 0.5)', 'rgba(59, 7, 100, 0.3)', 'rgba(30, 10, 60, 0.2)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.inputBorder}
+            >
+                <View style={styles.inputInner}>
+                    {prefix && <Text style={styles.inputPrefix}>{prefix}</Text>}
+                    <TextInput
+                        style={[styles.textInput, { textAlign }]}
+                        value={value}
+                        onChangeText={onChangeText}
+                        placeholder={placeholder}
+                        placeholderTextColor="rgba(255,255,255,0.3)"
+                        keyboardType={keyboardType}
+                        maxLength={maxLength}
+                    />
+                </View>
+            </LinearGradient>
+        </View>
+    );
+}
 
 export function LoginScreen() {
     const { setUser } = useAuth();
@@ -25,10 +107,76 @@ export function LoginScreen() {
     const [name, setName] = useState('');
     const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
     const [loading, setLoading] = useState(false);
+    const [showFullscreenLoading, setShowFullscreenLoading] = useState(false);
     const [error, setError] = useState('');
     const [confirm, setConfirm] = useState<any>(null);
+    const [loadingPhraseIndex, setLoadingPhraseIndex] = useState(0);
 
-    // Format phone for display
+    const textOpacity = useRef(new Animated.Value(0)).current;
+    const textTranslateY = useRef(new Animated.Value(20)).current;
+
+    const LOADING_PHRASES = [
+        'Loading exclusive clubs',
+        'Curating tonight\'s scene',
+        'Unlocking guestlists',
+        'Finding your vibe',
+    ];
+
+    useEffect(() => {
+        if (showFullscreenLoading) {
+            animatePhrase();
+        } else {
+            setLoadingPhraseIndex(0);
+            textOpacity.setValue(0);
+            textTranslateY.setValue(20);
+        }
+    }, [showFullscreenLoading, loadingPhraseIndex]);
+
+    const animatePhrase = () => {
+        // Reset values
+        textOpacity.setValue(0);
+        textTranslateY.setValue(20);
+
+        // Fade in and slide up
+        Animated.parallel([
+            Animated.timing(textOpacity, {
+                toValue: 1,
+                duration: 400,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+            }),
+            Animated.timing(textTranslateY, {
+                toValue: 0,
+                duration: 400,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+            }),
+        ]).start(() => {
+            // Hold for 500ms then fade out
+            setTimeout(() => {
+                if (showFullscreenLoading) {
+                    Animated.parallel([
+                        Animated.timing(textOpacity, {
+                            toValue: 0,
+                            duration: 300,
+                            easing: Easing.in(Easing.cubic),
+                            useNativeDriver: true,
+                        }),
+                        Animated.timing(textTranslateY, {
+                            toValue: -15,
+                            duration: 300,
+                            easing: Easing.in(Easing.cubic),
+                            useNativeDriver: true,
+                        }),
+                    ]).start(() => {
+                        // Move to next phrase
+                        setLoadingPhraseIndex((prev) => (prev + 1) % LOADING_PHRASES.length);
+                    });
+                }
+            }, 500);
+        });
+    };
+
     const formatPhoneDisplay = (value: string) => {
         const digits = value.replace(/\D/g, '');
         if (digits.length <= 5) return digits;
@@ -53,6 +201,17 @@ export function LoginScreen() {
 
         try {
             const fullPhone = `+91${phone}`;
+
+            if (isExpoGo) {
+                Alert.alert(
+                    'Development Mode',
+                    'Running in Expo Go - Firebase auth is bypassed. Proceeding to name entry.',
+                    [{ text: 'OK', onPress: () => setStep('name') }]
+                );
+                setLoading(false);
+                return;
+            }
+
             const confirmation = await auth().signInWithPhoneNumber(fullPhone);
             setConfirm(confirmation);
             setStep('otp');
@@ -75,18 +234,14 @@ export function LoginScreen() {
 
         try {
             await confirm.confirm(otp);
-
-            // Check if user exists in AsyncStorage (returning user)
             const existingUsers = JSON.parse(await AsyncStorage.getItem('afterhour_users') || '{}');
             const fullPhone = `+91${phone}`;
 
             if (existingUsers[fullPhone]) {
-                // Returning user - login directly
                 const userData = existingUsers[fullPhone];
                 await AsyncStorage.setItem('afterhour_current_user', JSON.stringify(userData));
                 setUser(userData);
             } else {
-                // New user - ask for name
                 setStep('name');
             }
         } catch (err: any) {
@@ -98,25 +253,22 @@ export function LoginScreen() {
     };
 
     const handleNameSubmit = async () => {
+        Keyboard.dismiss();
+
         if (name.trim().length < 2) {
             setError('Please enter your name');
             return;
         }
 
         setLoading(true);
+        setShowFullscreenLoading(true);
         try {
             const fullPhone = `+91${phone}`;
 
-            // Register/login user via backend API
             const response = await fetch('https://api.clubin.info/api/auth/phone-auth', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    phone: fullPhone,
-                    name: name.trim(),
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: fullPhone, name: name.trim() }),
             });
 
             if (!response.ok) {
@@ -126,11 +278,9 @@ export function LoginScreen() {
 
             const data = await response.json();
 
-            // Save token and user data
             await AsyncStorage.setItem('afterhour_token', data.token);
             await AsyncStorage.setItem('afterhour_current_user', JSON.stringify(data.user));
 
-            // Also save to users cache
             const existingUsers = JSON.parse(await AsyncStorage.getItem('afterhour_users') || '{}');
             existingUsers[fullPhone] = { ...data.user, phone: fullPhone, name: name.trim() };
             await AsyncStorage.setItem('afterhour_users', JSON.stringify(existingUsers));
@@ -139,6 +289,7 @@ export function LoginScreen() {
         } catch (err) {
             console.error('Registration error:', err);
             setError(err instanceof Error ? err.message : 'Registration failed');
+            setShowFullscreenLoading(false);
         } finally {
             setLoading(false);
         }
@@ -152,22 +303,12 @@ export function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            {/* Video Background */}
-            <Video
-                source={require('../assets/login-bg.mp4')}
-                style={styles.backgroundVideo}
-                resizeMode={ResizeMode.COVER}
-                shouldPlay
-                isLooping
-                isMuted
-            />
-            <View style={styles.videoOverlay} />
+            <AppBackground />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.content}
             >
-
                 {step === 'phone' && (
                     <View style={styles.formContainer}>
                         <View style={styles.header}>
@@ -175,34 +316,41 @@ export function LoginScreen() {
                             <Text style={styles.subtitle}>Enter your phone number to continue</Text>
                         </View>
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.countryCode}>+91</Text>
-                            <TextInput
-                                style={styles.phoneInput}
-                                placeholder="98765 43210"
-                                placeholderTextColor="#737373"
+                        <GlassCard3D>
+                            <GlassInput3D
                                 value={formatPhoneDisplay(phone)}
                                 onChangeText={handlePhoneChange}
+                                placeholder="98765 43210"
                                 keyboardType="phone-pad"
                                 maxLength={11}
+                                prefix="+91"
                             />
-                        </View>
 
-                        {error ? <Text style={styles.error}>{error}</Text> : null}
+                            {error ? <Text style={styles.error}>{error}</Text> : null}
 
-                        <TouchableOpacity
-                            style={[styles.button, (loading || phone.length !== 10) && styles.buttonDisabled]}
-                            onPress={handleSendOTP}
-                            disabled={loading || phone.length !== 10}
-                        >
-                            {loading ? (
-                                <ActivityIndicator color="#fff" />
-                            ) : (
-                                <Text style={styles.buttonText}>Get OTP</Text>
-                            )}
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.buttonOuter, (loading || phone.length !== 10) && styles.buttonDisabled]}
+                                onPress={handleSendOTP}
+                                disabled={loading || phone.length !== 10}
+                            >
+                                <LinearGradient
+                                    colors={['rgba(88, 28, 135, 0.7)', 'rgba(59, 7, 100, 0.5)', 'rgba(30, 10, 60, 0.4)']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.buttonBorder}
+                                >
+                                    <View style={styles.buttonInner}>
+                                        {loading ? (
+                                            <ActivityIndicator color="#a855f7" />
+                                        ) : (
+                                            <Text style={styles.buttonText}>Get OTP</Text>
+                                        )}
+                                    </View>
+                                </LinearGradient>
+                            </TouchableOpacity>
 
-                        <Text style={styles.hint}>We'll send a verification code to this number</Text>
+                            <Text style={styles.hint}>We'll send a verification code to this number</Text>
+                        </GlassCard3D>
                     </View>
                 )}
 
@@ -212,7 +360,7 @@ export function LoginScreen() {
                             onPress={() => { setStep('phone'); setOtp(''); setError(''); }}
                             style={styles.backButton}
                         >
-                            <ChevronLeft color="#9ca3af" size={20} />
+                            <ChevronLeft color="rgba(255,255,255,0.6)" size={20} />
                             <Text style={styles.backText}>Back</Text>
                         </TouchableOpacity>
 
@@ -221,42 +369,57 @@ export function LoginScreen() {
                             <Text style={styles.subtitle}>Enter the 6-digit code sent to +91 {formatPhoneDisplay(phone)}</Text>
                         </View>
 
-                        <TextInput
-                            style={styles.otpInput}
-                            placeholder="• • • • • •"
-                            placeholderTextColor="#737373"
-                            value={otp}
-                            onChangeText={handleOTPChange}
-                            keyboardType="number-pad"
-                            maxLength={6}
-                        />
+                        <GlassCard3D>
+                            <GlassInput3D
+                                value={otp}
+                                onChangeText={handleOTPChange}
+                                placeholder="• • • • • •"
+                                keyboardType="number-pad"
+                                maxLength={6}
+                                textAlign="center"
+                            />
 
-                        {error ? <Text style={styles.errorCenter}>{error}</Text> : null}
+                            {error ? <Text style={styles.errorCenter}>{error}</Text> : null}
 
-                        <TouchableOpacity
-                            style={[styles.button, (loading || otp.length !== 6) && styles.buttonDisabled]}
-                            onPress={handleVerifyOTP}
-                            disabled={loading || otp.length !== 6}
-                        >
-                            {loading ? (
-                                <ActivityIndicator color="#fff" />
-                            ) : (
-                                <Text style={styles.buttonText}>Verify & Continue</Text>
-                            )}
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.buttonOuter, (loading || otp.length !== 6) && styles.buttonDisabled]}
+                                onPress={handleVerifyOTP}
+                                disabled={loading || otp.length !== 6}
+                            >
+                                <LinearGradient
+                                    colors={['rgba(88, 28, 135, 0.7)', 'rgba(59, 7, 100, 0.5)', 'rgba(30, 10, 60, 0.4)']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.buttonBorder}
+                                >
+                                    <View style={styles.buttonInner}>
+                                        {loading ? (
+                                            <ActivityIndicator color="#a855f7" />
+                                        ) : (
+                                            <Text style={styles.buttonText}>Verify & Continue</Text>
+                                        )}
+                                    </View>
+                                </LinearGradient>
+                            </TouchableOpacity>
 
-                        <TouchableOpacity onPress={handleSendOTP} disabled={loading}>
-                            <Text style={styles.resendText}>Resend OTP</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity onPress={handleSendOTP} disabled={loading}>
+                                <Text style={styles.resendText}>Resend OTP</Text>
+                            </TouchableOpacity>
+                        </GlassCard3D>
                     </View>
                 )}
 
                 {step === 'name' && (
                     <View style={styles.formContainer}>
                         <View style={styles.avatarContainer}>
-                            <View style={styles.avatar}>
-                                <User color="#fff" size={40} />
-                            </View>
+                            <LinearGradient
+                                colors={['rgba(168, 85, 247, 0.4)', 'rgba(139, 92, 246, 0.2)']}
+                                style={styles.avatarBorder}
+                            >
+                                <View style={styles.avatar}>
+                                    <User color="#a855f7" size={32} />
+                                </View>
+                            </LinearGradient>
                         </View>
 
                         <View style={styles.headerCenter}>
@@ -264,27 +427,59 @@ export function LoginScreen() {
                             <Text style={styles.subtitle}>What should we call you?</Text>
                         </View>
 
-                        <TextInput
-                            style={styles.nameInput}
-                            placeholder="Your name"
-                            placeholderTextColor="#737373"
-                            value={name}
-                            onChangeText={(text) => { setName(text); setError(''); }}
-                            maxLength={30}
-                        />
+                        <GlassCard3D>
+                            <GlassInput3D
+                                value={name}
+                                onChangeText={(text) => { setName(text); setError(''); }}
+                                placeholder="Your name"
+                                maxLength={30}
+                                textAlign="center"
+                            />
 
-                        {error ? <Text style={styles.errorCenter}>{error}</Text> : null}
+                            {error ? <Text style={styles.errorCenter}>{error}</Text> : null}
 
-                        <TouchableOpacity
-                            style={[styles.button, name.trim().length < 2 && styles.buttonDisabled]}
-                            onPress={handleNameSubmit}
-                            disabled={name.trim().length < 2}
-                        >
-                            <Text style={styles.buttonText}>Let's Party! 🎉</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.buttonOuter, (name.trim().length < 2 || loading) && styles.buttonDisabled]}
+                                onPress={handleNameSubmit}
+                                disabled={name.trim().length < 2 || loading}
+                            >
+                                <LinearGradient
+                                    colors={['rgba(88, 28, 135, 0.7)', 'rgba(59, 7, 100, 0.5)', 'rgba(30, 10, 60, 0.4)']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.buttonBorder}
+                                >
+                                    <View style={styles.buttonInner}>
+                                        {loading ? (
+                                            <ActivityIndicator color="#a855f7" />
+                                        ) : (
+                                            <Text style={styles.buttonText}>Let's Party! 🎉</Text>
+                                        )}
+                                    </View>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </GlassCard3D>
                     </View>
                 )}
             </KeyboardAvoidingView>
+
+            {/* Fullscreen Loading Overlay - Cinematic Style */}
+            {showFullscreenLoading && (
+                <View style={styles.loadingOverlay}>
+                    <AppBackground />
+                    <Animated.Text
+                        style={[
+                            styles.loadingText,
+                            {
+                                opacity: textOpacity,
+                                transform: [{ translateY: textTranslateY }],
+                            },
+                        ]}
+                    >
+                        {LOADING_PHRASES[loadingPhraseIndex]}
+                    </Animated.Text>
+                </View>
+            )}
         </View>
     );
 }
@@ -292,24 +487,7 @@ export function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
-    },
-    backgroundVideo: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: width,
-        height: height,
-    },
-    videoOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: '#0a0a12',
     },
     content: {
         flex: 1,
@@ -320,98 +498,108 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     header: {
-        marginBottom: 32,
+        marginBottom: 24,
     },
     headerCenter: {
         alignItems: 'center',
-        marginBottom: 32,
+        marginBottom: 24,
     },
     title: {
-        fontSize: 36,
+        fontSize: 32,
         fontWeight: '800',
         color: '#fff',
         marginBottom: 8,
     },
     subtitle: {
-        fontSize: 16,
-        color: '#9ca3af',
+        fontSize: 15,
+        color: 'rgba(255,255,255,0.6)',
     },
-    inputContainer: {
+    glassCardOuter: {
+        position: 'relative',
+    },
+    glassCardShadow: {
+        position: 'absolute',
+        top: 4,
+        left: 4,
+        right: -4,
+        bottom: -4,
+        borderRadius: 24,
+        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    },
+    glassCardBorder: {
+        borderRadius: 24,
+        padding: 2,
+    },
+    glassCardInner: {
+        backgroundColor: 'rgba(10, 10, 18, 0.95)',
+        borderRadius: 22,
+        padding: 20,
+    },
+    inputOuter: {
+        marginBottom: 16,
+    },
+    inputBorder: {
+        borderRadius: 16,
+        padding: 2,
+    },
+    inputInner: {
+        backgroundColor: 'rgba(10, 10, 18, 0.98)',
+        borderRadius: 14,
+        padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#171717',
-        borderWidth: 1,
-        borderColor: '#262626',
-        borderRadius: 16,
-        marginBottom: 16,
     },
-    countryCode: {
-        color: '#9ca3af',
-        fontSize: 18,
+    inputPrefix: {
+        color: 'rgba(255,255,255,0.6)',
+        fontSize: 16,
         fontWeight: '600',
-        paddingLeft: 16,
+        marginRight: 8,
     },
-    phoneInput: {
+    textInput: {
         flex: 1,
-        padding: 16,
-        fontSize: 18,
+        fontSize: 16,
         color: '#fff',
-        letterSpacing: 2,
+        letterSpacing: 1,
     },
-    otpInput: {
-        backgroundColor: '#171717',
-        borderWidth: 1,
-        borderColor: '#262626',
-        borderRadius: 16,
-        padding: 16,
-        fontSize: 24,
-        color: '#fff',
-        textAlign: 'center',
-        letterSpacing: 8,
-        marginBottom: 16,
-    },
-    nameInput: {
-        backgroundColor: '#171717',
-        borderWidth: 1,
-        borderColor: '#262626',
-        borderRadius: 16,
-        padding: 16,
-        fontSize: 18,
-        color: '#fff',
-        textAlign: 'center',
-        marginBottom: 16,
-    },
-    button: {
-        backgroundColor: '#a855f7',
-        borderRadius: 16,
-        padding: 18,
-        alignItems: 'center',
+    buttonOuter: {
+        borderRadius: 50,
+        overflow: 'hidden',
         marginTop: 8,
+    },
+    buttonBorder: {
+        borderRadius: 50,
+        padding: 2,
+    },
+    buttonInner: {
+        backgroundColor: 'rgba(10, 10, 18, 0.98)',
+        borderRadius: 48,
+        paddingVertical: 16,
+        alignItems: 'center',
     },
     buttonDisabled: {
         opacity: 0.5,
     },
     buttonText: {
         color: '#fff',
-        fontSize: 18,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
     },
     error: {
-        color: '#ef4444',
-        fontSize: 14,
+        color: '#f87171',
+        fontSize: 13,
         marginBottom: 8,
     },
     errorCenter: {
-        color: '#ef4444',
-        fontSize: 14,
+        color: '#f87171',
+        fontSize: 13,
         marginBottom: 8,
         textAlign: 'center',
     },
     hint: {
-        color: '#6b7280',
-        fontSize: 14,
+        color: 'rgba(255,255,255,0.4)',
+        fontSize: 13,
         textAlign: 'center',
-        marginTop: 24,
+        marginTop: 16,
     },
     backButton: {
         flexDirection: 'row',
@@ -419,26 +607,49 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     backText: {
-        color: '#9ca3af',
-        fontSize: 16,
+        color: 'rgba(255,255,255,0.6)',
+        fontSize: 15,
         marginLeft: 4,
     },
     resendText: {
         color: '#a855f7',
-        fontSize: 16,
+        fontSize: 14,
         textAlign: 'center',
         marginTop: 16,
     },
     avatarContainer: {
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 16,
+    },
+    avatarBorder: {
+        borderRadius: 40,
+        padding: 2,
     },
     avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#a855f7',
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: 'rgba(15, 15, 25, 0.95)',
         justifyContent: 'center',
         alignItems: 'center',
     },
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 100,
+    },
+    loadingText: {
+        color: '#fff',
+        fontSize: 24,
+        fontWeight: '700',
+        letterSpacing: 0.5,
+        textAlign: 'center',
+        paddingHorizontal: 40,
+    },
 });
+

@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ticket, CheckCircle } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
+import { AppBackground } from '../components/AppBackground';
 
 // Local Booking type
 interface Booking {
@@ -113,51 +114,57 @@ export function BookingsScreen({ navigation }: any) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>My Tickets</Text>
-            </View>
-
-            {bookings.length === 0 && !loading ? (
-                <View style={styles.empty}>
-                    <View style={styles.emptyIcon}>
-                        <Ticket color="#525252" size={40} />
-                    </View>
-                    <Text style={styles.emptyText}>No upcoming plans</Text>
-                    <TouchableOpacity
-                        style={styles.emptyButton}
-                        onPress={() => navigation.navigate('Home')}
-                    >
-                        <Text style={styles.emptyButtonText}>Find an Event</Text>
-                    </TouchableOpacity>
+        <View style={styles.container}>
+            <AppBackground />
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>My Tickets</Text>
                 </View>
-            ) : (
-                <FlatList
-                    data={bookings}
-                    renderItem={renderBookingCard}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.list}
-                    showsVerticalScrollIndicator={false}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={() => {
-                                setRefreshing(true);
-                                fetchBookings();
-                            }}
-                            tintColor="#a855f7"
-                        />
-                    }
-                />
-            )}
-        </SafeAreaView>
+
+                {bookings.length === 0 && !loading ? (
+                    <View style={styles.empty}>
+                        <View style={styles.emptyIcon}>
+                            <Ticket color="#525252" size={40} />
+                        </View>
+                        <Text style={styles.emptyText}>No upcoming plans</Text>
+                        <TouchableOpacity
+                            style={styles.emptyButton}
+                            onPress={() => navigation.navigate('Home')}
+                        >
+                            <Text style={styles.emptyButtonText}>Find an Event</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={bookings}
+                        renderItem={renderBookingCard}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={styles.list}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={() => {
+                                    setRefreshing(true);
+                                    fetchBookings();
+                                }}
+                                tintColor="#a855f7"
+                            />
+                        }
+                    />
+                )}
+            </SafeAreaView>
+        </View >
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#0a0a12',
+    },
+    safeArea: {
+        flex: 1,
     },
     header: {
         padding: 20,

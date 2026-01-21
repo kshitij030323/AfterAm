@@ -385,7 +385,7 @@ export function EventDetailScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#0a0a12',
     },
     imageContainer: {
         height: height * 0.55,

@@ -18,6 +18,7 @@ import {
 import { ChevronLeft, Info, Minus, Plus, X, User } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
+import { AppBackground } from '../components/AppBackground';
 
 interface Event {
     id: string;
@@ -177,153 +178,159 @@ export function GuestlistScreen({ route, navigation }: any) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <ChevronLeft color="#a3a3a3" size={24} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Select Guests</Text>
-            </View>
-
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                <View style={styles.eventCard}>
-                    <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
-                    <View style={styles.eventInfo}>
-                        <Text style={styles.eventTitle}>{event.title}</Text>
-                        <Text style={styles.eventSub}>{event.club}</Text>
-                    </View>
-                </View>
-
-                <View style={styles.counters}>
-                    {GUEST_TYPES.map((type) => (
-                        <View key={type.key} style={styles.counterRow}>
-                            <View style={styles.counterInfo}>
-                                <type.IconComponent />
-                                <View>
-                                    <Text style={styles.counterLabel}>{type.label}</Text>
-                                    <Text style={styles.counterSub}>{type.sub}</Text>
-                                </View>
-                            </View>
-                            <View style={styles.counterControls}>
-                                <TouchableOpacity
-                                    style={styles.counterButton}
-                                    onPress={() => updateCount(type.key, -1)}
-                                >
-                                    <Minus color="#a3a3a3" size={20} />
-                                </TouchableOpacity>
-                                <Text style={styles.counterValue}>{counts[type.key]}</Text>
-                                <TouchableOpacity
-                                    style={[styles.counterButton, styles.counterButtonAdd]}
-                                    onPress={() => updateCount(type.key, 1)}
-                                >
-                                    <Plus color="#a855f7" size={20} />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    ))}
-                </View>
-
-                {total > 0 && (
-                    <View style={styles.infoCard}>
-                        <Info color="#a855f7" size={18} />
-                        <View style={styles.infoContent}>
-                            <Text style={styles.infoTitle}>Next Step</Text>
-                            <Text style={styles.infoText}>• Enter names of all guests</Text>
-                            <Text style={styles.infoText}>• Government ID is mandatory</Text>
-                        </View>
-                    </View>
-                )}
-
-                <View style={{ height: 120 }} />
-            </ScrollView>
-
-            <View style={styles.footer}>
-                <TouchableOpacity
-                    style={[styles.ctaButton, total === 0 && styles.ctaButtonDisabled]}
-                    onPress={initializeGuests}
-                    disabled={total === 0}
-                >
-                    <Text style={[styles.ctaText, total === 0 && styles.ctaTextDisabled]}>
-                        Continue
-                    </Text>
-                    {total > 0 && (
-                        <View style={styles.ctaBadge}>
-                            <Text style={styles.ctaBadgeText}>{total} Guests</Text>
-                        </View>
-                    )}
-                </TouchableOpacity>
-            </View>
-
-            {/* Guest Names Modal */}
-            <Modal
-                visible={showNamesModal}
-                animationType="slide"
-                transparent={false}
-            >
-                <SafeAreaView style={styles.modalContainer}>
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                        style={{ flex: 1 }}
+        <View style={styles.container}>
+            <AppBackground />
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
                     >
-                        <View style={styles.modalHeader}>
-                            <TouchableOpacity onPress={() => setShowNamesModal(false)}>
-                                <X color="#a3a3a3" size={24} />
-                            </TouchableOpacity>
-                            <Text style={styles.modalTitle}>Enter Guest Names</Text>
-                            <View style={{ width: 24 }} />
+                        <ChevronLeft color="#a3a3a3" size={24} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Select Guests</Text>
+                </View>
+
+                <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+                    <View style={styles.eventCard}>
+                        <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
+                        <View style={styles.eventInfo}>
+                            <Text style={styles.eventTitle}>{event.title}</Text>
+                            <Text style={styles.eventSub}>{event.club}</Text>
                         </View>
+                    </View>
 
-                        <ScrollView style={styles.modalContent}>
-                            <Text style={styles.modalSubtitle}>
-                                Please enter names for all {total} guests
-                            </Text>
-
-                            {guests.map((guest, index) => (
-                                <View key={index} style={styles.nameInputRow}>
-                                    <View style={styles.nameIcon}>{getGuestIcon(guest)}</View>
-                                    <View style={styles.nameInputContainer}>
-                                        <Text style={styles.nameLabel}>{getGuestLabel(guest, index)}</Text>
-                                        <TextInput
-                                            style={styles.nameInput}
-                                            placeholder={guest.type === 'couple' ? 'Both names (e.g., John & Jane)' : 'Enter name'}
-                                            placeholderTextColor="#525252"
-                                            value={guest.name}
-                                            onChangeText={(text) => updateGuestName(index, text)}
-                                        />
+                    <View style={styles.counters}>
+                        {GUEST_TYPES.map((type) => (
+                            <View key={type.key} style={styles.counterRow}>
+                                <View style={styles.counterInfo}>
+                                    <type.IconComponent />
+                                    <View>
+                                        <Text style={styles.counterLabel}>{type.label}</Text>
+                                        <Text style={styles.counterSub}>{type.sub}</Text>
                                     </View>
                                 </View>
-                            ))}
+                                <View style={styles.counterControls}>
+                                    <TouchableOpacity
+                                        style={styles.counterButton}
+                                        onPress={() => updateCount(type.key, -1)}
+                                    >
+                                        <Minus color="#a3a3a3" size={20} />
+                                    </TouchableOpacity>
+                                    <Text style={styles.counterValue}>{counts[type.key]}</Text>
+                                    <TouchableOpacity
+                                        style={[styles.counterButton, styles.counterButtonAdd]}
+                                        onPress={() => updateCount(type.key, 1)}
+                                    >
+                                        <Plus color="#a855f7" size={20} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ))}
+                    </View>
 
-                            <View style={{ height: 100 }} />
-                        </ScrollView>
-
-                        <View style={styles.modalFooter}>
-                            <TouchableOpacity
-                                style={styles.ctaButton}
-                                onPress={handleConfirm}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <ActivityIndicator color="#fff" />
-                                ) : (
-                                    <Text style={styles.ctaText}>Confirm Booking</Text>
-                                )}
-                            </TouchableOpacity>
+                    {total > 0 && (
+                        <View style={styles.infoCard}>
+                            <Info color="#a855f7" size={18} />
+                            <View style={styles.infoContent}>
+                                <Text style={styles.infoTitle}>Next Step</Text>
+                                <Text style={styles.infoText}>• Enter names of all guests</Text>
+                                <Text style={styles.infoText}>• Government ID is mandatory</Text>
+                            </View>
                         </View>
-                    </KeyboardAvoidingView>
-                </SafeAreaView>
-            </Modal>
-        </SafeAreaView>
+                    )}
+
+                    <View style={{ height: 120 }} />
+                </ScrollView>
+
+                <View style={styles.footer}>
+                    <TouchableOpacity
+                        style={[styles.ctaButton, total === 0 && styles.ctaButtonDisabled]}
+                        onPress={initializeGuests}
+                        disabled={total === 0}
+                    >
+                        <Text style={[styles.ctaText, total === 0 && styles.ctaTextDisabled]}>
+                            Continue
+                        </Text>
+                        {total > 0 && (
+                            <View style={styles.ctaBadge}>
+                                <Text style={styles.ctaBadgeText}>{total} Guests</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
+
+                {/* Guest Names Modal */}
+                <Modal
+                    visible={showNamesModal}
+                    animationType="slide"
+                    transparent={false}
+                >
+                    <SafeAreaView style={styles.modalContainer}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                            style={{ flex: 1 }}
+                        >
+                            <View style={styles.modalHeader}>
+                                <TouchableOpacity onPress={() => setShowNamesModal(false)}>
+                                    <X color="#a3a3a3" size={24} />
+                                </TouchableOpacity>
+                                <Text style={styles.modalTitle}>Enter Guest Names</Text>
+                                <View style={{ width: 24 }} />
+                            </View>
+
+                            <ScrollView style={styles.modalContent}>
+                                <Text style={styles.modalSubtitle}>
+                                    Please enter names for all {total} guests
+                                </Text>
+
+                                {guests.map((guest, index) => (
+                                    <View key={index} style={styles.nameInputRow}>
+                                        <View style={styles.nameIcon}>{getGuestIcon(guest)}</View>
+                                        <View style={styles.nameInputContainer}>
+                                            <Text style={styles.nameLabel}>{getGuestLabel(guest, index)}</Text>
+                                            <TextInput
+                                                style={styles.nameInput}
+                                                placeholder={guest.type === 'couple' ? 'Both names (e.g., John & Jane)' : 'Enter name'}
+                                                placeholderTextColor="#525252"
+                                                value={guest.name}
+                                                onChangeText={(text) => updateGuestName(index, text)}
+                                            />
+                                        </View>
+                                    </View>
+                                ))}
+
+                                <View style={{ height: 100 }} />
+                            </ScrollView>
+
+                            <View style={styles.modalFooter}>
+                                <TouchableOpacity
+                                    style={styles.ctaButton}
+                                    onPress={handleConfirm}
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <ActivityIndicator color="#fff" />
+                                    ) : (
+                                        <Text style={styles.ctaText}>Confirm Booking</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </KeyboardAvoidingView>
+                    </SafeAreaView>
+                </Modal>
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#0a0a12',
+    },
+    safeArea: {
+        flex: 1,
     },
     header: {
         flexDirection: 'row',
@@ -459,10 +466,8 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         padding: 20,
-        paddingBottom: Platform.OS === 'android' ? 100 : 36,
-        backgroundColor: '#0a0a0a',
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.05)',
+        paddingBottom: Platform.OS === 'android' ? 100 : 110,
+        backgroundColor: 'transparent',
     },
     ctaButton: {
         flexDirection: 'row',

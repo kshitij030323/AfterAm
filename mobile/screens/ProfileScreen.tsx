@@ -17,6 +17,7 @@ import {
 import { ChevronRight, LogOut, X, Bell, User, HelpCircle, FileText, Shield } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
+import { AppBackground } from '../components/AppBackground';
 
 export function ProfileScreen() {
     const { user, logout, updateUser } = useAuth();
@@ -128,199 +129,205 @@ export function ProfileScreen() {
     const supportItems = MENU_ITEMS.filter((i) => i.section === 'support');
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>Profile</Text>
-                </View>
+        <View style={styles.container}>
+            <AppBackground />
+            <SafeAreaView style={styles.safeArea}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Profile</Text>
+                    </View>
 
-                {/* Profile Card */}
-                <View style={styles.profileCard}>
-                    <View style={styles.avatarContainer}>
-                        <View style={styles.avatarGradient}>
-                            <View style={styles.avatar}>
-                                <Text style={styles.avatarText}>
-                                    {user?.name[0]?.toUpperCase() || '?'}
-                                </Text>
+                    {/* Profile Card */}
+                    <View style={styles.profileCard}>
+                        <View style={styles.avatarContainer}>
+                            <View style={styles.avatarGradient}>
+                                <View style={styles.avatar}>
+                                    <Text style={styles.avatarText}>
+                                        {user?.name[0]?.toUpperCase() || '?'}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                        <View style={styles.profileInfo}>
+                            <Text style={styles.profileName}>{user?.name || 'Guest'}</Text>
+                            <Text style={styles.profileEmail}>{user?.phone ? formatPhone(user.phone) : 'No phone'}</Text>
+                            <View style={styles.badges}>
+                                <View style={styles.badge}>
+                                    <Text style={styles.badgeText}>Member</Text>
+                                </View>
+                                <View style={[styles.badge, styles.badgePurple]}>
+                                    <Text style={[styles.badgeText, { color: '#c084fc' }]}>Bengaluru</Text>
+                                </View>
                             </View>
                         </View>
                     </View>
-                    <View style={styles.profileInfo}>
-                        <Text style={styles.profileName}>{user?.name || 'Guest'}</Text>
-                        <Text style={styles.profileEmail}>{user?.phone ? formatPhone(user.phone) : 'No phone'}</Text>
-                        <View style={styles.badges}>
-                            <View style={styles.badge}>
-                                <Text style={styles.badgeText}>Member</Text>
-                            </View>
-                            <View style={[styles.badge, styles.badgePurple]}>
-                                <Text style={[styles.badgeText, { color: '#c084fc' }]}>Bengaluru</Text>
-                            </View>
-                        </View>
+
+                    {/* Account Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>ACCOUNT</Text>
+                        {accountItems.map((item, index) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={[
+                                    styles.menuItem,
+                                    index === 0 && styles.menuItemFirst,
+                                    index === accountItems.length - 1 && styles.menuItemLast,
+                                ]}
+                                onPress={() => handleMenuPress(item.id)}
+                            >
+                                <View style={styles.menuItemLeft}>
+                                    <item.icon color="#a855f7" size={20} />
+                                    <Text style={styles.menuItemText}>{item.label}</Text>
+                                </View>
+                                <ChevronRight color="#525252" size={20} />
+                            </TouchableOpacity>
+                        ))}
                     </View>
-                </View>
 
-                {/* Account Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>ACCOUNT</Text>
-                    {accountItems.map((item, index) => (
-                        <TouchableOpacity
-                            key={item.id}
-                            style={[
-                                styles.menuItem,
-                                index === 0 && styles.menuItemFirst,
-                                index === accountItems.length - 1 && styles.menuItemLast,
-                            ]}
-                            onPress={() => handleMenuPress(item.id)}
-                        >
-                            <View style={styles.menuItemLeft}>
-                                <item.icon color="#a855f7" size={20} />
-                                <Text style={styles.menuItemText}>{item.label}</Text>
+                    {/* Support Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>SUPPORT</Text>
+                        {supportItems.map((item, index) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={[
+                                    styles.menuItem,
+                                    index === 0 && styles.menuItemFirst,
+                                    index === supportItems.length - 1 && styles.menuItemLast,
+                                ]}
+                                onPress={() => handleMenuPress(item.id)}
+                            >
+                                <View style={styles.menuItemLeft}>
+                                    <item.icon color="#a855f7" size={20} />
+                                    <Text style={styles.menuItemText}>{item.label}</Text>
+                                </View>
+                                <ChevronRight color="#525252" size={20} />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    {/* Logout Button */}
+                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                        <LogOut color="#ef4444" size={20} />
+                        <Text style={styles.logoutText}>Log Out</Text>
+                    </TouchableOpacity>
+
+                    <View style={{ height: 120 }} />
+                </ScrollView>
+
+                {/* Account Settings Modal */}
+                <Modal visible={showSettingsModal} animationType="slide" transparent>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Account Settings</Text>
+                                <TouchableOpacity onPress={() => setShowSettingsModal(false)}>
+                                    <X color="#fff" size={24} />
+                                </TouchableOpacity>
                             </View>
-                            <ChevronRight color="#525252" size={20} />
-                        </TouchableOpacity>
-                    ))}
-                </View>
 
-                {/* Support Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>SUPPORT</Text>
-                    {supportItems.map((item, index) => (
-                        <TouchableOpacity
-                            key={item.id}
-                            style={[
-                                styles.menuItem,
-                                index === 0 && styles.menuItemFirst,
-                                index === supportItems.length - 1 && styles.menuItemLast,
-                            ]}
-                            onPress={() => handleMenuPress(item.id)}
-                        >
-                            <View style={styles.menuItemLeft}>
-                                <item.icon color="#a855f7" size={20} />
-                                <Text style={styles.menuItemText}>{item.label}</Text>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputLabel}>Display Name</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={editName}
+                                    onChangeText={setEditName}
+                                    placeholder="Enter your name"
+                                    placeholderTextColor="#666"
+                                />
                             </View>
-                            <ChevronRight color="#525252" size={20} />
-                        </TouchableOpacity>
-                    ))}
-                </View>
 
-                {/* Logout Button */}
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <LogOut color="#ef4444" size={20} />
-                    <Text style={styles.logoutText}>Log Out</Text>
-                </TouchableOpacity>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputLabel}>Phone Number</Text>
+                                <View style={[styles.input, styles.inputDisabled]}>
+                                    <Text style={styles.inputDisabledText}>
+                                        {user?.phone ? formatPhone(user.phone) : 'Not set'}
+                                    </Text>
+                                </View>
+                                <Text style={styles.inputHint}>Phone number cannot be changed</Text>
+                            </View>
 
-                <View style={{ height: 120 }} />
-            </ScrollView>
-
-            {/* Account Settings Modal */}
-            <Modal visible={showSettingsModal} animationType="slide" transparent>
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Account Settings</Text>
-                            <TouchableOpacity onPress={() => setShowSettingsModal(false)}>
-                                <X color="#fff" size={24} />
+                            <TouchableOpacity style={styles.saveButton} onPress={handleSaveSettings}>
+                                <Text style={styles.saveButtonText}>Save Changes</Text>
                             </TouchableOpacity>
                         </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Display Name</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={editName}
-                                onChangeText={setEditName}
-                                placeholder="Enter your name"
-                                placeholderTextColor="#666"
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Phone Number</Text>
-                            <View style={[styles.input, styles.inputDisabled]}>
-                                <Text style={styles.inputDisabledText}>
-                                    {user?.phone ? formatPhone(user.phone) : 'Not set'}
-                                </Text>
-                            </View>
-                            <Text style={styles.inputHint}>Phone number cannot be changed</Text>
-                        </View>
-
-                        <TouchableOpacity style={styles.saveButton} onPress={handleSaveSettings}>
-                            <Text style={styles.saveButtonText}>Save Changes</Text>
-                        </TouchableOpacity>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-            {/* Notifications Modal */}
-            <Modal visible={showNotificationsModal} animationType="slide" transparent>
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Notifications</Text>
-                            <TouchableOpacity onPress={() => setShowNotificationsModal(false)}>
-                                <X color="#fff" size={24} />
+                {/* Notifications Modal */}
+                <Modal visible={showNotificationsModal} animationType="slide" transparent>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Notifications</Text>
+                                <TouchableOpacity onPress={() => setShowNotificationsModal(false)}>
+                                    <X color="#fff" size={24} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.settingRow}>
+                                <View>
+                                    <Text style={styles.settingLabel}>Push Notifications</Text>
+                                    <Text style={styles.settingDescription}>Receive booking confirmations</Text>
+                                </View>
+                                <Switch
+                                    value={notificationsEnabled}
+                                    onValueChange={setNotificationsEnabled}
+                                    trackColor={{ false: '#333', true: '#7c3aed' }}
+                                    thumbColor={notificationsEnabled ? '#a855f7' : '#666'}
+                                />
+                            </View>
+
+                            <View style={styles.settingRow}>
+                                <View>
+                                    <Text style={styles.settingLabel}>Event Reminders</Text>
+                                    <Text style={styles.settingDescription}>Get reminded before events</Text>
+                                </View>
+                                <Switch
+                                    value={eventReminders}
+                                    onValueChange={setEventReminders}
+                                    trackColor={{ false: '#333', true: '#7c3aed' }}
+                                    thumbColor={eventReminders ? '#a855f7' : '#666'}
+                                />
+                            </View>
+
+                            <View style={styles.settingRow}>
+                                <View>
+                                    <Text style={styles.settingLabel}>Promotions</Text>
+                                    <Text style={styles.settingDescription}>Special offers and discounts</Text>
+                                </View>
+                                <Switch
+                                    value={promotions}
+                                    onValueChange={setPromotions}
+                                    trackColor={{ false: '#333', true: '#7c3aed' }}
+                                    thumbColor={promotions ? '#a855f7' : '#666'}
+                                />
+                            </View>
+
+                            <TouchableOpacity
+                                style={styles.saveButton}
+                                onPress={() => {
+                                    setShowNotificationsModal(false);
+                                    Alert.alert('Saved', 'Notification preferences updated!');
+                                }}
+                            >
+                                <Text style={styles.saveButtonText}>Save Preferences</Text>
                             </TouchableOpacity>
                         </View>
-
-                        <View style={styles.settingRow}>
-                            <View>
-                                <Text style={styles.settingLabel}>Push Notifications</Text>
-                                <Text style={styles.settingDescription}>Receive booking confirmations</Text>
-                            </View>
-                            <Switch
-                                value={notificationsEnabled}
-                                onValueChange={setNotificationsEnabled}
-                                trackColor={{ false: '#333', true: '#7c3aed' }}
-                                thumbColor={notificationsEnabled ? '#a855f7' : '#666'}
-                            />
-                        </View>
-
-                        <View style={styles.settingRow}>
-                            <View>
-                                <Text style={styles.settingLabel}>Event Reminders</Text>
-                                <Text style={styles.settingDescription}>Get reminded before events</Text>
-                            </View>
-                            <Switch
-                                value={eventReminders}
-                                onValueChange={setEventReminders}
-                                trackColor={{ false: '#333', true: '#7c3aed' }}
-                                thumbColor={eventReminders ? '#a855f7' : '#666'}
-                            />
-                        </View>
-
-                        <View style={styles.settingRow}>
-                            <View>
-                                <Text style={styles.settingLabel}>Promotions</Text>
-                                <Text style={styles.settingDescription}>Special offers and discounts</Text>
-                            </View>
-                            <Switch
-                                value={promotions}
-                                onValueChange={setPromotions}
-                                trackColor={{ false: '#333', true: '#7c3aed' }}
-                                thumbColor={promotions ? '#a855f7' : '#666'}
-                            />
-                        </View>
-
-                        <TouchableOpacity
-                            style={styles.saveButton}
-                            onPress={() => {
-                                setShowNotificationsModal(false);
-                                Alert.alert('Saved', 'Notification preferences updated!');
-                            }}
-                        >
-                            <Text style={styles.saveButtonText}>Save Preferences</Text>
-                        </TouchableOpacity>
                     </View>
-                </View>
-            </Modal>
-        </SafeAreaView>
+                </Modal>
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#0a0a12',
+    },
+    safeArea: {
+        flex: 1,
     },
     header: {
         padding: 20,
