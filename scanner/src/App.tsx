@@ -8,7 +8,7 @@ import { EventForm } from './pages/EventForm';
 import { Layout } from './components/Layout';
 import './App.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface Club {
   id: string;

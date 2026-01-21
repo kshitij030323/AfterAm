@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Loader2, Upload, X } from 'lucide-react';
 import { useAuth, useApi } from '../App';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 const GENRES = ['Techno', 'Bollywood', 'House', 'Hip-Hop', 'EDM', 'Live', 'Commercial'];
 
 interface EventForm {
@@ -103,7 +105,7 @@ export function EventForm() {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const response = await fetch('http://localhost:3001/api/upload', {
+            const response = await fetch(`${API_BASE}/upload`, {
                 method: 'POST',
                 body: formData,
             });
@@ -129,7 +131,7 @@ export function EventForm() {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const response = await fetch('http://localhost:3001/api/upload', {
+            const response = await fetch(`${API_BASE}/upload`, {
                 method: 'POST',
                 body: formData,
             });
@@ -154,7 +156,7 @@ export function EventForm() {
                 if (!file.type.startsWith('image/')) continue;
                 const formData = new FormData();
                 formData.append('file', file);
-                const response = await fetch('http://localhost:3001/api/upload', {
+                const response = await fetch(`${API_BASE}/upload`, {
                     method: 'POST',
                     body: formData,
                 });
