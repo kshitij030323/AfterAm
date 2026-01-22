@@ -203,29 +203,26 @@ export function HomeScreen({ navigation }: any) {
                     {CATEGORIES.map((cat) => {
                         const isActive = selectedCategory === cat.id;
 
-                        if (isActive) {
-                            return (
-                                <TouchableOpacity
-                                    key={cat.id}
-                                    onPress={() => setSelectedCategory(cat.id)}
-                                    style={styles.categoryButtonContainer}
-                                >
-                                    <BlurView intensity={80} tint="light" style={styles.categoryButtonBlur}>
-                                        <View style={styles.categoryButtonGlass}>
-                                            <Text style={styles.categoryTextActive}>{cat.label}</Text>
-                                        </View>
-                                    </BlurView>
-                                </TouchableOpacity>
-                            );
-                        }
-
                         return (
                             <TouchableOpacity
                                 key={cat.id}
-                                style={styles.categoryButton}
                                 onPress={() => setSelectedCategory(cat.id)}
+                                style={styles.categoryButtonContainer}
                             >
-                                <Text style={styles.categoryText}>{cat.label}</Text>
+                                <BlurView
+                                    intensity={isActive ? 60 : 40}
+                                    tint="dark"
+                                    style={styles.categoryButtonBlur}
+                                >
+                                    <View style={[
+                                        styles.categoryButtonGlass,
+                                        isActive && styles.categoryButtonGlassActive
+                                    ]}>
+                                        <Text style={isActive ? styles.categoryTextActive : styles.categoryText}>
+                                            {cat.label}
+                                        </Text>
+                                    </View>
+                                </BlurView>
                             </TouchableOpacity>
                         );
                     })}
@@ -333,7 +330,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 18,
-        backgroundColor: '#333333',
+        backgroundColor: 'rgba(30, 15, 50, 0.4)',
         marginRight: 10,
     },
     categoryButtonContainer: {
@@ -352,22 +349,26 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(168, 85, 247, 0.25)',
+        backgroundColor: 'rgba(60, 40, 80, 0.3)',
         borderRadius: 18,
         borderWidth: 1,
-        borderColor: 'rgba(168, 85, 247, 0.5)',
+        borderColor: 'rgba(139, 92, 246, 0.2)',
+    },
+    categoryButtonGlassActive: {
+        backgroundColor: 'rgba(139, 92, 246, 0.35)',
+        borderColor: 'rgba(167, 139, 250, 0.5)',
     },
     categoryButtonActive: {
         backgroundColor: '#a855f7',
     },
     categoryText: {
-        color: '#999',
+        color: '#9a8ab0',
         fontWeight: '600',
         fontSize: 13,
         textAlign: 'center',
     },
     categoryTextActive: {
-        color: '#a855f7',
+        color: '#ffffff',
         fontWeight: '700',
         fontSize: 13,
         textAlign: 'center',

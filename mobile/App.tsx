@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Home, Ticket, User, MapPinPlus } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -61,15 +62,15 @@ function TabIcon({ IconComponent, focused, size }: { IconComponent: any; focused
   if (focused) {
     return (
       <View style={styles.activeTabIconContainer}>
-        <BlurView intensity={80} tint="light" style={styles.activeTabIconBlur}>
+        <BlurView intensity={80} tint="dark" style={styles.activeTabIconBlur}>
           <View style={styles.activeTabIconOverlay}>
-            <IconComponent color="#a855f7" size={size} />
+            <IconComponent color="#ffffff" size={size} />
           </View>
         </BlurView>
       </View>
     );
   }
-  return <IconComponent color="#666" size={size} />;
+  return <IconComponent color="#6b5b7a" size={size} />;
 }
 
 function MainTabs() {
@@ -80,8 +81,9 @@ function MainTabs() {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: 'absolute',
-          backgroundColor: 'rgba(20, 20, 20, 0.7)',
-          borderTopWidth: 0,
+          backgroundColor: 'rgba(30, 15, 50, 0.15)',
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(167, 139, 250, 0.25)',
           height: 90,
           paddingBottom: 30,
           paddingTop: 15,
@@ -89,16 +91,24 @@ function MainTabs() {
           borderTopRightRadius: 30,
         },
         tabBarBackground: () => (
-          <BlurView
-            intensity={50}
-            tint="dark"
-            style={{
-              ...StyleSheet.absoluteFillObject,
-              borderTopLeftRadius: 30,
-              borderTopRightRadius: 30,
-              overflow: 'hidden',
-            }}
-          />
+          <View style={{
+            ...StyleSheet.absoluteFillObject,
+            borderTopLeftRadius: 30,
+            borderTopRightRadius: 30,
+            overflow: 'hidden',
+          }}>
+            <BlurView
+              intensity={100}
+              tint="dark"
+              style={StyleSheet.absoluteFillObject}
+            />
+            <LinearGradient
+              colors={['rgba(139, 92, 246, 0.15)', 'rgba(88, 28, 135, 0.25)', 'rgba(49, 10, 101, 0.35)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
+            />
+          </View>
         ),
       }}
     >
@@ -224,9 +234,9 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+    backgroundColor: 'rgba(139, 92, 246, 0.35)',
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.4)',
+    borderColor: 'rgba(167, 139, 250, 0.5)',
   },
 });
