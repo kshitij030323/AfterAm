@@ -181,17 +181,25 @@ export function HomeScreen({ navigation }: any) {
                     </View>
                 </View>
 
-                <View style={styles.searchContainer}>
-                    <Search color="#737373" size={20} />
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search clubs, DJs, or genres..."
-                        placeholderTextColor="#737373"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                    />
+                <View style={styles.searchWrapper}>
+                    <BlurView
+                        intensity={40}
+                        tint="dark"
+                        style={styles.searchBlur}
+                    >
+                        <View style={styles.searchContainer}>
+                            <Search color="#9a8ab0" size={20} />
+                            <TextInput
+                                style={styles.searchInput}
+                                placeholder="Search clubs, DJs, or genres..."
+                                placeholderTextColor="#9a8ab0"
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                            />
+                        </View>
+                    </BlurView>
                 </View>
 
                 <ScrollView
@@ -228,12 +236,13 @@ export function HomeScreen({ navigation }: any) {
                     })}
                 </ScrollView>
 
-                <Text style={styles.sectionTitle}>Trending Tonight</Text>
+                <Text style={styles.sectionTitle}>Featured Events</Text>
 
                 <FlatList
                     data={filteredEvents}
                     renderItem={renderEventCard}
                     keyExtractor={(item) => item.id}
+                    style={{ flex: 1 }}
                     contentContainerStyle={filteredEvents.length === 0 ? styles.emptyList : styles.list}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
@@ -296,16 +305,24 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#fff',
     },
+    searchWrapper: {
+        marginHorizontal: 20,
+        marginBottom: 16,
+        borderRadius: 16,
+        overflow: 'hidden',
+    },
+    searchBlur: {
+        borderRadius: 16,
+        overflow: 'hidden',
+    },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#171717',
-        marginHorizontal: 20,
+        backgroundColor: 'rgba(60, 40, 80, 0.3)',
         paddingHorizontal: 16,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: '#262626',
-        marginBottom: 16,
+        borderColor: 'rgba(139, 92, 246, 0.2)',
     },
     searchInput: {
         flex: 1,
@@ -315,12 +332,14 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     categories: {
-        marginTop: 8,
-        marginBottom: 20,
+        marginTop: 0,
+        marginBottom: 8,
+        flexGrow: 0,
+        flexShrink: 0,
     },
     categoriesContent: {
         paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingVertical: 4,
         flexDirection: 'row',
         alignItems: 'center',
     },
@@ -378,14 +397,14 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#fff',
         paddingHorizontal: 20,
-        marginBottom: 16,
+        marginTop: 16,
+        marginBottom: 12,
     },
     list: {
         paddingHorizontal: 20,
         paddingBottom: 120,
     },
     emptyList: {
-        flexGrow: 1,
         paddingHorizontal: 20,
     },
     loadingContainer: {
@@ -401,9 +420,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     emptyContainer: {
-        flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
         paddingVertical: 60,
     },
     emptyIcon: {
@@ -422,12 +439,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     card: {
-        backgroundColor: '#171717',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
         borderRadius: 24,
         overflow: 'hidden',
         marginBottom: 20,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(139, 92, 246, 0.25)',
     },
     cardImage: {
         width: '100%',
@@ -493,8 +510,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 16,
+        backgroundColor: 'rgba(30, 20, 50, 0.6)',
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.05)',
+        borderTopColor: 'rgba(139, 92, 246, 0.15)',
     },
     cardTime: {
         flexDirection: 'row',

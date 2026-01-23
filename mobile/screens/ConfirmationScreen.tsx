@@ -17,7 +17,7 @@ import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppBackground } from '../components/AppBackground';
 
-const clubinLogo = require('../assets/icon.png');
+const clubinLogo = require('../assets/clubin-confirmation-logo.png');
 
 // Local Booking type (matches our AsyncStorage format)
 interface LocalBooking {
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     },
     shareableArea: {
         backgroundColor: '#0a0a0a',
-        padding: 20,
+        padding: 0,
         alignItems: 'center',
         width: '100%',
     },
@@ -310,11 +310,10 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     shareLogo: {
-        width: 100,
-        height: 100,
+        width: 140,
+        height: 140,
         alignSelf: 'center',
-        marginBottom: 16,
-        borderRadius: 20,
+        marginVertical: 0,
     },
     ticket: {
         backgroundColor: '#fff',
@@ -323,6 +322,7 @@ const styles = StyleSheet.create({
         width: '100%',
         maxWidth: 320,
         position: 'relative',
+        marginTop: -8,
         marginBottom: 32,
     },
     ticketNotch: {

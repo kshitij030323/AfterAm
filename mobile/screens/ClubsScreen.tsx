@@ -196,11 +196,13 @@ const styles = StyleSheet.create({
         color: '#d4d4d4',
     },
     eventsBadge: {
-        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+        backgroundColor: 'rgba(60, 40, 80, 0.6)',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 20,
         alignSelf: 'flex-start',
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.3)',
     },
     eventsText: {
         fontSize: 12,

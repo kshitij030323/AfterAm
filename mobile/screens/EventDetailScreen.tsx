@@ -498,12 +498,12 @@ const styles = StyleSheet.create({
     infoRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#171717',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
         borderRadius: 16,
         marginBottom: 28,
         paddingVertical: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(139, 92, 246, 0.25)',
     },
     infoCard: {
         flex: 1,

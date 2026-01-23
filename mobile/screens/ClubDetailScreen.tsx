@@ -234,26 +234,30 @@ const styles = StyleSheet.create({
     },
     eventCard: {
         flexDirection: 'row',
-        backgroundColor: '#171717',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
         borderRadius: 16,
         overflow: 'hidden',
         marginBottom: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
     },
     eventImage: {
         width: 100,
-        height: 100,
+        alignSelf: 'stretch',
     },
     eventContent: {
         flex: 1,
         padding: 12,
     },
     genreBadge: {
-        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+        backgroundColor: 'rgba(60, 40, 80, 0.6)',
         paddingHorizontal: 8,
         paddingVertical: 3,
         borderRadius: 12,
         alignSelf: 'flex-start',
         marginBottom: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.3)',
     },
     genreText: {
         fontSize: 10,

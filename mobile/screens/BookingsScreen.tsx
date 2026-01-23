@@ -9,6 +9,7 @@ import {
     RefreshControl,
     Platform,
     StatusBar,
+    Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ticket, CheckCircle } from 'lucide-react-native';
@@ -96,9 +97,11 @@ export function BookingsScreen({ navigation }: any) {
                     <CheckCircle color="#22c55e" size={16} />
                 </View>
 
-                <View style={styles.qrPlaceholder}>
-                    <Text style={styles.qrText}>QR</Text>
-                </View>
+                <Image
+                    source={{ uri: event.imageUrl }}
+                    style={styles.eventImage}
+                    resizeMode="cover"
+                />
 
                 <View style={styles.cardContent}>
                     <Text style={styles.cardTitle}>{event.title}</Text>
@@ -183,12 +186,12 @@ const styles = StyleSheet.create({
     card: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#171717',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(139, 92, 246, 0.25)',
         position: 'relative',
         overflow: 'hidden',
     },
@@ -200,18 +203,11 @@ const styles = StyleSheet.create({
         padding: 8,
         borderBottomLeftRadius: 12,
     },
-    qrPlaceholder: {
+    eventImage: {
         width: 80,
         height: 80,
-        backgroundColor: '#fff',
+        backgroundColor: '#262626',
         borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    qrText: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#0a0a0a',
     },
     cardContent: {
         flex: 1,
@@ -233,14 +229,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 8,
-        backgroundColor: 'rgba(0,0,0,0.3)',
+        backgroundColor: 'rgba(60, 40, 80, 0.6)',
         padding: 8,
         borderRadius: 8,
         alignSelf: 'flex-start',
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.3)',
     },
     cardGuestText: {
         fontSize: 10,
-        color: '#737373',
+        color: '#c4b5fd',
     },
     empty: {
         flex: 1,

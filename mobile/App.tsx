@@ -102,6 +102,8 @@ function MainTabs() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
+        lazy: true,
+        animation: 'fade',
         tabBarStyle: {
           position: 'absolute',
           backgroundColor: 'rgba(30, 15, 50, 0.15)',

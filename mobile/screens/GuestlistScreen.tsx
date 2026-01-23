@@ -356,12 +356,12 @@ const styles = StyleSheet.create({
     eventCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#171717',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
         padding: 16,
         borderRadius: 16,
         marginBottom: 24,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(139, 92, 246, 0.25)',
     },
     eventImage: {
         width: 56,
@@ -387,11 +387,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#171717',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
         padding: 16,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(139, 92, 246, 0.25)',
     },
     counterInfo: {
         flexDirection: 'row',

@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
         paddingTop: 10,
     },
     skeleton: {
-        backgroundColor: '#2a2a2a',
+        backgroundColor: 'rgba(80, 60, 100, 0.5)',
         borderRadius: 8,
     },
     eventCard: {
@@ -131,7 +131,9 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginBottom: 16,
         overflow: 'hidden',
-        backgroundColor: '#1a1a1a',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
     },
     eventImage: {
         position: 'absolute',
@@ -184,7 +186,9 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginBottom: 16,
         overflow: 'hidden',
-        backgroundColor: '#1a1a1a',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
     },
     clubImage: {
         position: 'absolute',
@@ -221,11 +225,13 @@ const styles = StyleSheet.create({
     },
     eventListItem: {
         flexDirection: 'row',
-        backgroundColor: '#171717',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
         borderRadius: 16,
         marginBottom: 12,
         overflow: 'hidden',
         height: 100,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
     },
     eventListImage: {
         width: 100,
