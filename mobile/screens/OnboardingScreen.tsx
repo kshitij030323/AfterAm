@@ -10,6 +10,7 @@ import {
     SafeAreaView,
     Easing,
     Image,
+    Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     logoContainer: {
-        marginTop: 12,
+        marginTop: Platform.OS === 'android' ? 40 : 12,
         alignItems: 'center',
     },
     logoImage: {

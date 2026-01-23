@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
         zIndex: 5,
     },
     logoContainer: {
-        marginTop: 12,
+        marginTop: Platform.OS === 'android' ? 40 : 12,
         alignItems: 'center',
         paddingHorizontal: 24,
     },

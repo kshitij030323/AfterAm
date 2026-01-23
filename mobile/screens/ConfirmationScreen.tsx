@@ -8,6 +8,7 @@ import {
     ScrollView,
     Alert,
     ActivityIndicator,
+    Image,
 } from 'react-native';
 import { CheckCircle, Clock, Calendar, Share2, XCircle } from 'lucide-react-native';
 import QRCode from 'react-native-qrcode-svg';
@@ -15,6 +16,8 @@ import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppBackground } from '../components/AppBackground';
+
+const clubinLogo = require('../assets/icon.png');
 
 // Local Booking type (matches our AsyncStorage format)
 interface LocalBooking {
@@ -150,7 +153,7 @@ export function ConfirmationScreen({ route, navigation }: any) {
                         style={styles.viewShot}
                     >
                         <View style={styles.shareableArea}>
-                            <Text style={styles.shareTitle}>🎉 Booked on Clubin!</Text>
+                            <Image source={clubinLogo} style={styles.shareLogo} resizeMode="contain" />
                             <View style={styles.ticket}>
                                 <View style={styles.ticketNotch} />
                                 <View style={styles.ticketNotchBottom} />
@@ -294,12 +297,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
     },
+    shareTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
+    },
     shareTitle: {
         fontSize: 18,
         fontWeight: '700',
         color: '#fff',
+        marginRight: 8,
+    },
+    shareLogo: {
+        width: 100,
+        height: 100,
+        alignSelf: 'center',
         marginBottom: 16,
-        textAlign: 'center',
+        borderRadius: 20,
     },
     ticket: {
         backgroundColor: '#fff',
