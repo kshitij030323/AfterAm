@@ -13,6 +13,8 @@ import {
     Animated,
     Easing,
     Keyboard,
+    Image,
+    SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, ChevronLeft } from 'lucide-react-native';
@@ -35,6 +37,8 @@ if (!isExpoGo) {
 }
 
 const { width, height } = Dimensions.get('window');
+
+const clubinLogo = require('../assets/clubin-logo.png');
 
 // Glass card with 3D border effect
 function GlassCard3D({ children, style }: { children: React.ReactNode; style?: any }) {
@@ -305,6 +309,17 @@ export function LoginScreen() {
         <View style={styles.container}>
             <AppBackground />
 
+            <SafeAreaView style={styles.safeArea}>
+                {/* Logo at top - centered */}
+                <View style={styles.logoContainer}>
+                    <Image
+                        source={clubinLogo}
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                    />
+                </View>
+            </SafeAreaView>
+
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.content}
@@ -411,27 +426,16 @@ export function LoginScreen() {
 
                 {step === 'name' && (
                     <View style={styles.formContainer}>
-                        <View style={styles.avatarContainer}>
-                            <LinearGradient
-                                colors={['rgba(168, 85, 247, 0.4)', 'rgba(139, 92, 246, 0.2)']}
-                                style={styles.avatarBorder}
-                            >
-                                <View style={styles.avatar}>
-                                    <User color="#a855f7" size={32} />
-                                </View>
-                            </LinearGradient>
-                        </View>
-
-                        <View style={styles.headerCenter}>
-                            <Text style={styles.title}>Almost there!</Text>
-                            <Text style={styles.subtitle}>What should we call you?</Text>
+                        <View style={styles.headerCenterName}>
+                            <Text style={styles.titleName}>Just One Step Left</Text>
+                            <Text style={styles.subtitleName}>This name will be used for guestlist entry</Text>
                         </View>
 
                         <GlassCard3D>
                             <GlassInput3D
                                 value={name}
                                 onChangeText={(text) => { setName(text); setError(''); }}
-                                placeholder="Your name"
+                                placeholder="Full name"
                                 maxLength={30}
                                 textAlign="center"
                             />
@@ -453,7 +457,7 @@ export function LoginScreen() {
                                         {loading ? (
                                             <ActivityIndicator color="#a855f7" />
                                         ) : (
-                                            <Text style={styles.buttonText}>Let's Party! 🎉</Text>
+                                            <Text style={styles.buttonText}>Confirm Name</Text>
                                         )}
                                     </View>
                                 </LinearGradient>
@@ -489,6 +493,22 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#0a0a12',
     },
+    safeArea: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 5,
+    },
+    logoContainer: {
+        marginTop: 12,
+        alignItems: 'center',
+        paddingHorizontal: 24,
+    },
+    logoImage: {
+        width: 280,
+        height: 80,
+    },
     content: {
         flex: 1,
         justifyContent: 'center',
@@ -513,6 +533,24 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 15,
         color: 'rgba(255,255,255,0.6)',
+    },
+    headerCenterName: {
+        alignItems: 'center',
+        marginBottom: 32,
+        marginTop: 20,
+    },
+    titleName: {
+        fontSize: 32,
+        fontWeight: '800',
+        color: '#fff',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    subtitleName: {
+        fontSize: 15,
+        color: 'rgba(255,255,255,0.5)',
+        textAlign: 'center',
+        lineHeight: 22,
     },
     glassCardOuter: {
         position: 'relative',

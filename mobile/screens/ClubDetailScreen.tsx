@@ -6,10 +6,10 @@ import {
     FlatList,
     TouchableOpacity,
     SafeAreaView,
-    Image,
     RefreshControl,
     Dimensions,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, MapPin, Calendar, Clock } from 'lucide-react-native';
@@ -88,7 +88,7 @@ export function ClubDetailScreen({ route, navigation }: any) {
             onPress={() => navigation.navigate('EventDetail', { event: item })}
             activeOpacity={0.8}
         >
-            <Image source={{ uri: item.imageUrl }} style={styles.eventImage} />
+            <Image source={{ uri: item.imageUrl }} style={styles.eventImage} cachePolicy="memory-disk" />
             <View style={styles.eventContent}>
                 <View style={styles.genreBadge}>
                     <Text style={styles.genreText}>{item.genre}</Text>
@@ -114,7 +114,7 @@ export function ClubDetailScreen({ route, navigation }: any) {
             <AppBackground />
             {/* Hero Header with Gradient Fade */}
             <View style={styles.hero}>
-                <Image source={{ uri: club.imageUrl }} style={styles.heroImage} />
+                <Image source={{ uri: club.imageUrl }} style={styles.heroImage} cachePolicy="memory-disk" />
                 <LinearGradient
                     colors={['transparent', 'rgba(10,10,10,0.6)', '#0a0a0a']}
                     style={styles.heroGradient}

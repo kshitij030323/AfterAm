@@ -5,7 +5,6 @@ import {
     StyleSheet,
     FlatList,
     TouchableOpacity,
-    Image,
     RefreshControl,
     ScrollView,
     TextInput,
@@ -14,6 +13,7 @@ import {
     Platform,
     StatusBar,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { BlurView } from 'expo-blur';
 import { MapPin, Search, Clock } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -131,7 +131,7 @@ export function HomeScreen({ navigation }: any) {
                 onPress={() => navigation.navigate('EventDetail', { event: item })}
                 activeOpacity={0.8}
             >
-                <Image source={{ uri: item.imageUrl, cache: 'reload' }} style={styles.cardImage} />
+                <Image source={{ uri: item.imageUrl }} style={styles.cardImage} cachePolicy="memory-disk" />
                 <View style={styles.cardOverlay} />
 
                 <View style={styles.cardDateBadge}>

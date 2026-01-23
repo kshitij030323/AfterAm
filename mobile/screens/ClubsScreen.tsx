@@ -7,10 +7,10 @@ import {
     TouchableOpacity,
     SafeAreaView,
     RefreshControl,
-    Image,
     Platform,
     StatusBar,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useFocusEffect } from '@react-navigation/native';
 import { MapPin, ChevronRight } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -71,7 +71,7 @@ export function ClubsScreen({ navigation }: any) {
             onPress={() => navigation.navigate('ClubDetail', { club: item })}
             activeOpacity={0.8}
         >
-            <Image source={{ uri: item.imageUrl }} style={styles.cardImage} />
+            <Image source={{ uri: item.imageUrl }} style={styles.cardImage} cachePolicy="memory-disk" />
             <View style={styles.cardOverlay} />
             <View style={styles.cardContent}>
                 <Text style={styles.clubName}>{item.name}</Text>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
@@ -20,9 +20,24 @@ import { LoginScreen } from './screens/LoginScreen';
 import { ClubsScreen } from './screens/ClubsScreen';
 import { ClubDetailScreen } from './screens/ClubDetailScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
+import { AnimatedSplashScreen } from './components/AnimatedSplashScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+// Custom dark theme to prevent white flash on Android
+const AppDarkTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: '#a855f7',
+    background: '#0a0a0a',
+    card: '#0a0a0a',
+    text: '#ffffff',
+    border: '#1a1a1a',
+    notification: '#a855f7',
+  },
+};
 
 function HomeStack() {
   return (
@@ -30,6 +45,10 @@ function HomeStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: '#0a0a0a' },
+        animation: 'slide_from_right',
+        animationDuration: 250,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen name="HomeList" component={HomeScreen} />
@@ -46,6 +65,10 @@ function ClubsStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: '#0a0a0a' },
+        animation: 'slide_from_right',
+        animationDuration: 250,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen name="ClubsList" component={ClubsScreen} />
@@ -154,6 +177,7 @@ function MainTabs() {
 
 function AppNavigator() {
   const { user } = useAuth();
+  const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -168,6 +192,13 @@ function AppNavigator() {
       setShowOnboarding(true);
     }
   };
+
+  // Show animated splash screen first
+  if (showSplash) {
+    return (
+      <AnimatedSplashScreen onAnimationComplete={() => setShowSplash(false)} />
+    );
+  }
 
   // Loading state while checking onboarding status
   if (showOnboarding === null) {
@@ -188,7 +219,7 @@ function AppNavigator() {
   // Show login if user is not authenticated
   if (!user) {
     return (
-      <NavigationContainer>
+      <NavigationContainer theme={AppDarkTheme}>
         <LoginScreen />
       </NavigationContainer>
     );
@@ -196,7 +227,7 @@ function AppNavigator() {
 
   // Show main app if user is logged in
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={AppDarkTheme}>
       <MainTabs />
     </NavigationContainer>
   );

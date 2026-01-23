@@ -4,7 +4,6 @@ import {
     Text,
     StyleSheet,
     ScrollView,
-    Image,
     TouchableOpacity,
     SafeAreaView,
     Dimensions,
@@ -15,12 +14,14 @@ import {
     Platform,
     StatusBar,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { Video, ResizeMode, Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, MapPin, Clock, Star, Info, Ticket, Users, ChevronDown, Navigation, X, Volume2, VolumeX, Images } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Event } from '../lib/api';
+import { getCachedVideoUrl, preCacheVideo } from '../lib/videoCache';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,6 +32,8 @@ export function EventDetailScreen({ route, navigation }: any) {
     const [showGalleryModal, setShowGalleryModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isMuted, setIsMuted] = useState(true);
+    const [videoReady, setVideoReady] = useState(false);
+    const [cachedVideoUrl, setCachedVideoUrl] = useState<string | null>(null);
     const videoRef = useRef<Video>(null);
 
     // Configure audio mode to allow sound even with iOS silent switch on
@@ -48,6 +51,25 @@ export function EventDetailScreen({ route, navigation }: any) {
         };
         configureAudio();
     }, []);
+
+    // Load cached video URL on mount
+    useEffect(() => {
+        if (event.videoUrl) {
+            // Reset video ready state when event changes
+            setVideoReady(false);
+
+            getCachedVideoUrl(event.videoUrl).then(url => {
+                setCachedVideoUrl(url);
+            });
+            // Pre-cache for next time
+            preCacheVideo(event.videoUrl);
+        }
+    }, [event.videoUrl]);
+
+    // Handle video load completion
+    const handleVideoLoad = () => {
+        setVideoReady(true);
+    };
 
     // Load guest count for this event - refresh when screen is focused
     useFocusEffect(
@@ -163,19 +185,27 @@ export function EventDetailScreen({ route, navigation }: any) {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 200 }}>
                 {/* Hero Video/Image */}
                 <View style={styles.imageContainer}>
-                    {event.videoUrl ? (
+                    {/* Always show the image first */}
+                    <Image
+                        source={{ uri: event.imageUrl }}
+                        style={[styles.image, videoReady && event.videoUrl ? { opacity: 0 } : {}]}
+                        cachePolicy="memory-disk"
+                    />
+
+                    {/* Load video in background, only show when ready */}
+                    {event.videoUrl && cachedVideoUrl && (
                         <Video
                             ref={videoRef}
-                            source={{ uri: event.videoUrl }}
-                            style={styles.video}
+                            source={{ uri: cachedVideoUrl }}
+                            style={[styles.video, { opacity: videoReady ? 1 : 0 }]}
                             resizeMode={ResizeMode.COVER}
-                            shouldPlay
+                            shouldPlay={videoReady}
                             isLooping
                             isMuted={isMuted}
+                            onLoad={handleVideoLoad}
                         />
-                    ) : (
-                        <Image source={{ uri: event.imageUrl, cache: 'reload' }} style={styles.image} />
                     )}
+
                     <LinearGradient
                         colors={['transparent', 'rgba(10,10,10,0.6)', '#0a0a0a']}
                         locations={[0.3, 0.7, 1]}
@@ -191,8 +221,8 @@ export function EventDetailScreen({ route, navigation }: any) {
                         </TouchableOpacity>
                     </SafeAreaView>
 
-                    {/* Mute button for video */}
-                    {event.videoUrl && (
+                    {/* Mute button for video - only show when video is ready */}
+                    {event.videoUrl && videoReady && (
                         <TouchableOpacity
                             style={styles.muteButton}
                             onPress={() => setIsMuted(!isMuted)}
@@ -354,7 +384,8 @@ export function EventDetailScreen({ route, navigation }: any) {
                                 <Image
                                     source={{ uri: item }}
                                     style={styles.galleryImage}
-                                    resizeMode="cover"
+                                    contentFit="cover"
+                                    cachePolicy="memory-disk"
                                 />
                             </TouchableOpacity>
                         )}
@@ -372,7 +403,8 @@ export function EventDetailScreen({ route, navigation }: any) {
                             <Image
                                 source={{ uri: selectedImage }}
                                 style={styles.fullScreenImage}
-                                resizeMode="contain"
+                                contentFit="contain"
+                                cachePolicy="memory-disk"
                             />
                         </View>
                     )}
@@ -620,6 +652,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     video: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
         width: '100%',
         height: '100%',
     },

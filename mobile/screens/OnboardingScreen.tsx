@@ -9,10 +9,13 @@ import {
     Animated,
     SafeAreaView,
     Easing,
+    Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppBackground } from '../components/AppBackground';
+
+const clubinLogo = require('../assets/clubin-logo.png');
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,7 +24,7 @@ const ONBOARDING_DATA = [
         id: '1',
         subtitle: 'EXCLUSIVE CLUBS. EVERY GENRE.',
         titleLine1: 'Get In.',
-        titleLine2: 'No Lines. No Stress.',
+        titleLine2: 'No Lines.\nNo Stress.',
         description: 'Discover the hottest clubs around you —\nfrom techno to hip-hop, all in one place.',
     },
     {
@@ -56,36 +59,169 @@ function GlassCard3D({ children, style }: { children: React.ReactNode; style?: a
     );
 }
 
+// Animated text content component with staggered animations
+function AnimatedTextContent({ item, isActive }: { item: typeof ONBOARDING_DATA[0]; isActive: boolean }) {
+    const subtitleOpacity = useRef(new Animated.Value(0)).current;
+    const titleLine1Opacity = useRef(new Animated.Value(0)).current;
+    const titleLine1TranslateY = useRef(new Animated.Value(12)).current;
+    const titleLine2Opacity = useRef(new Animated.Value(0)).current;
+    const titleLine2TranslateY = useRef(new Animated.Value(12)).current;
+    const titleLine2Scale = useRef(new Animated.Value(0.98)).current;
+    const titleLine2Glow = useRef(new Animated.Value(0)).current;
+    const descriptionOpacity = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (isActive) {
+            runStaggeredAnimation();
+        } else {
+            resetAnimations();
+        }
+    }, [isActive]);
+
+    const resetAnimations = () => {
+        subtitleOpacity.setValue(0);
+        titleLine1Opacity.setValue(0);
+        titleLine1TranslateY.setValue(12);
+        titleLine2Opacity.setValue(0);
+        titleLine2TranslateY.setValue(12);
+        titleLine2Scale.setValue(0.98);
+        titleLine2Glow.setValue(0);
+        descriptionOpacity.setValue(0);
+    };
+
+    const runStaggeredAnimation = () => {
+        resetAnimations();
+
+        // Stagger delay between elements
+        const staggerDelay = 120;
+
+        // 1. Subtitle fades in first (subtle)
+        Animated.timing(subtitleOpacity, {
+            toValue: 1,
+            duration: 400,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+        }).start();
+
+        // 2. Title line 1 slides up + fades in
+        setTimeout(() => {
+            Animated.parallel([
+                Animated.timing(titleLine1Opacity, {
+                    toValue: 1,
+                    duration: 450,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: true,
+                }),
+                Animated.timing(titleLine1TranslateY, {
+                    toValue: 0,
+                    duration: 500,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        }, staggerDelay);
+
+        // 3. Title line 2 with scale + glow pulse
+        setTimeout(() => {
+            Animated.parallel([
+                Animated.timing(titleLine2Opacity, {
+                    toValue: 1,
+                    duration: 450,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: true,
+                }),
+                Animated.timing(titleLine2TranslateY, {
+                    toValue: 0,
+                    duration: 500,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: true,
+                }),
+                Animated.timing(titleLine2Scale, {
+                    toValue: 1,
+                    duration: 600,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: true,
+                }),
+            ]).start();
+
+            // Subtle glow pulse
+            Animated.sequence([
+                Animated.timing(titleLine2Glow, {
+                    toValue: 1,
+                    duration: 400,
+                    easing: Easing.out(Easing.cubic),
+                    useNativeDriver: true,
+                }),
+                Animated.timing(titleLine2Glow, {
+                    toValue: 0.6,
+                    duration: 600,
+                    easing: Easing.inOut(Easing.cubic),
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        }, staggerDelay * 2);
+
+        // 4. Description fades in last with reduced opacity
+        setTimeout(() => {
+            Animated.timing(descriptionOpacity, {
+                toValue: 1,
+                duration: 500,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+            }).start();
+        }, staggerDelay * 3.5);
+    };
+
+    return (
+        <>
+            {/* Subtitle */}
+            <Animated.Text style={[styles.subtitle, { opacity: subtitleOpacity }]}>
+                {item.subtitle}
+            </Animated.Text>
+
+            {/* Title Line 1 */}
+            <Animated.Text
+                style={[
+                    styles.titleLine1,
+                    {
+                        opacity: titleLine1Opacity,
+                        transform: [{ translateY: titleLine1TranslateY }],
+                    },
+                ]}
+            >
+                {item.titleLine1}
+            </Animated.Text>
+
+            {/* Title Line 2 - with glow effect */}
+            <Animated.View
+                style={[
+                    styles.titleLine2Container,
+                    {
+                        opacity: titleLine2Opacity,
+                        transform: [
+                            { translateY: titleLine2TranslateY },
+                            { scale: titleLine2Scale },
+                        ],
+                    },
+                ]}
+            >
+                <Text style={styles.titleLine2}>
+                    {item.titleLine2}
+                </Text>
+            </Animated.View>
+
+            {/* Description */}
+            <Animated.Text style={[styles.description, { opacity: descriptionOpacity }]}>
+                {item.description}
+            </Animated.Text>
+        </>
+    );
+}
+
 export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
     const scrollX = useRef(new Animated.Value(0)).current;
-
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const slideAnim = useRef(new Animated.Value(20)).current;
-
-    useEffect(() => {
-        animateContent();
-    }, [currentIndex]);
-
-    const animateContent = () => {
-        fadeAnim.setValue(0);
-        slideAnim.setValue(20);
-
-        Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 600,
-                useNativeDriver: true,
-            }),
-            Animated.timing(slideAnim, {
-                toValue: 0,
-                duration: 600,
-                easing: Easing.out(Easing.cubic),
-                useNativeDriver: true,
-            }),
-        ]).start();
-    };
 
     const handleNext = async () => {
         if (currentIndex < ONBOARDING_DATA.length - 1) {
@@ -117,34 +253,29 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.contentContainer}>
-                    {/* Logo */}
+                    {/* Logo - stays fixed */}
                     <View style={styles.logoContainer}>
-                        <Text style={styles.logoIcon}>🎉</Text>
-                        <Text style={styles.logoText}>Clubin</Text>
+                        <Image
+                            source={clubinLogo}
+                            style={styles.logoImage}
+                            resizeMode="contain"
+                        />
                     </View>
 
-                    {/* Spacer */}
+                    {/* Reduced spacer - moves content higher */}
                     <View style={styles.spacer} />
 
-                    {/* Main Content Card */}
-                    <Animated.View
-                        style={[
-                            styles.contentCard,
-                            {
-                                opacity: fadeAnim,
-                                transform: [{ translateY: slideAnim }]
-                            }
-                        ]}
-                    >
+                    {/* Main Content Card - expanded */}
+                    <View style={styles.contentCard}>
                         <GlassCard3D>
-                            <Text style={styles.subtitle}>{item.subtitle}</Text>
-                            <Text style={styles.titleLine1}>{item.titleLine1}</Text>
-                            <Text style={styles.titleLine2}>{item.titleLine2}</Text>
-                            <Text style={styles.description}>{item.description}</Text>
+                            <AnimatedTextContent
+                                item={item}
+                                isActive={index === currentIndex}
+                            />
                         </GlassCard3D>
-                    </Animated.View>
+                    </View>
 
-                    {/* Page Indicators */}
+                    {/* Page Indicators - stays fixed */}
                     <View style={styles.indicatorContainer}>
                         {ONBOARDING_DATA.map((_, i) => (
                             <View
@@ -157,7 +288,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                         ))}
                     </View>
 
-                    {/* Button with 3D border */}
+                    {/* Button - stays fixed */}
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
                             style={styles.nextButtonOuter}
@@ -234,25 +365,18 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     logoContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
         marginTop: 12,
+        alignItems: 'center',
     },
-    logoIcon: {
-        fontSize: 24,
-    },
-    logoText: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: '#fff',
-        letterSpacing: 0.5,
+    logoImage: {
+        width: 280,
+        height: 80,
     },
     spacer: {
-        flex: 1,
+        flex: 0.4, // Reduced from 1 to move content higher
     },
     contentCard: {
-        marginBottom: 24,
+        marginBottom: 28,
     },
     glassCardOuter: {
         position: 'relative',
@@ -263,42 +387,49 @@ const styles = StyleSheet.create({
         left: 4,
         right: -4,
         bottom: -4,
-        borderRadius: 24,
-        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+        borderRadius: 28,
+        backgroundColor: 'rgba(139, 92, 246, 0.12)',
     },
     glassCardBorder: {
-        borderRadius: 24,
+        borderRadius: 28,
         padding: 2,
     },
     glassCardInner: {
         backgroundColor: 'rgba(10, 10, 18, 0.95)',
-        borderRadius: 22,
-        padding: 24,
+        borderRadius: 26,
+        paddingVertical: 32, // Increased padding for larger card
+        paddingHorizontal: 28,
+        minHeight: 220, // Minimum height for more presence
     },
     subtitle: {
         fontSize: 11,
         fontWeight: '600',
         color: 'rgba(255, 255, 255, 0.5)',
         letterSpacing: 1.5,
-        marginBottom: 12,
-    },
-    titleLine1: {
-        fontSize: 32,
-        fontWeight: '800',
-        color: '#fff',
-        lineHeight: 38,
-    },
-    titleLine2: {
-        fontSize: 32,
-        fontWeight: '800',
-        color: '#a855f7',
-        lineHeight: 38,
         marginBottom: 16,
     },
+    titleLine1: {
+        fontSize: 36, // Larger headline
+        fontWeight: '800',
+        color: '#fff',
+        lineHeight: 44, // Increased line height
+    },
+    titleLine2Container: {
+        marginBottom: 20,
+    },
+    titleLine2: {
+        fontSize: 36, // Larger headline
+        fontWeight: '800',
+        color: '#a855f7',
+        lineHeight: 44, // Increased line height
+        textShadowColor: 'rgba(168, 85, 247, 0.4)',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 10,
+    },
     description: {
-        fontSize: 15,
-        color: 'rgba(255, 255, 255, 0.6)',
-        lineHeight: 22,
+        fontSize: 14, // Slightly smaller
+        color: 'rgba(255, 255, 255, 0.55)',
+        lineHeight: 21,
     },
     indicatorContainer: {
         flexDirection: 'row',

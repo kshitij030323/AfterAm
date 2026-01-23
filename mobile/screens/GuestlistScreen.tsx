@@ -4,7 +4,6 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Image,
     ScrollView,
     SafeAreaView,
     Alert,
@@ -15,6 +14,7 @@ import {
     Platform,
     StatusBar,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { ChevronLeft, Info, Minus, Plus, X, User } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
@@ -193,7 +193,7 @@ export function GuestlistScreen({ route, navigation }: any) {
 
                 <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                     <View style={styles.eventCard}>
-                        <Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
+                        <Image source={{ uri: event.imageUrl }} style={styles.eventImage} cachePolicy="memory-disk" />
                         <View style={styles.eventInfo}>
                             <Text style={styles.eventTitle}>{event.title}</Text>
                             <Text style={styles.eventSub}>{event.club}</Text>

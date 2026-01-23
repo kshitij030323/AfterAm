@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "bc1e9b81-d6bf-4573-86b1-cd2a52bfec5d"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.hacker67.afterhour",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}
