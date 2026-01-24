@@ -10,13 +10,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="layout">
             <aside className="sidebar">
                 <div className="sidebar-header">
-                    <div className="sidebar-logo">
-                        <QrCode color="white" size={20} />
-                    </div>
-                    <div>
-                        <div className="sidebar-title">AfterHour</div>
-                        <div className="sidebar-subtitle">Scanner Portal</div>
-                    </div>
+                    <img src="/clubin-logo.png" alt="Clubin" className="sidebar-logo-img" style={{ height: '40px', width: 'auto' }} />
                 </div>
 
                 <ul className="nav-links">

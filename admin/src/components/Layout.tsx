@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, LogOut, Music, Building2 } from 'lucide-react';
+import { LayoutDashboard, Calendar, LogOut, Building2 } from 'lucide-react';
 import { useAuth } from '../App';
 
 interface LayoutProps {
@@ -23,13 +23,7 @@ export function Layout({ children }: LayoutProps) {
             <aside className="w-64 bg-neutral-900 border-r border-neutral-800 flex flex-col">
                 <div className="p-6 border-b border-neutral-800">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
-                            <Music className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="font-bold text-white">AfterHour</h1>
-                            <p className="text-xs text-neutral-500">Admin Portal</p>
-                        </div>
+                        <img src="/clubin-logo.png" alt="Clubin" className="h-10 w-auto" />
                     </div>
                 </div>
 

@@ -7,14 +7,14 @@ async function main() {
     console.log('🌱 Seeding database...');
 
     // Create admin user
-    const adminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10);
+    const adminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'Oksana@09', 10);
     const admin = await prisma.user.upsert({
         where: { phone: process.env.ADMIN_PHONE || '+919999999999' },
         update: {},
         create: {
-            email: process.env.ADMIN_EMAIL || 'admin@afterhour.in',
+            email: process.env.ADMIN_EMAIL || 'Kshitij',
             password: adminPassword,
-            name: 'Admin',
+            name: 'Kshitij',
             phone: process.env.ADMIN_PHONE || '+919999999999',
             isAdmin: true,
         },
