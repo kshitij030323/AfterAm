@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { QrCode } from 'lucide-react';
+
 import { useAuth } from '../App';
 
 export function Login() {
@@ -30,10 +30,8 @@ export function Login() {
         <div className="login-page">
             <div className="login-card">
                 <div className="login-header">
-                    <div className="login-icon">
-                        <QrCode color="white" size={32} />
-                    </div>
-                    <h1 className="login-title">AfterHour Scanner</h1>
+                    <img src="/clubin-logo.png" alt="Clubin" style={{ width: '180px', height: 'auto', marginBottom: '1rem' }} />
+                    <h1 className="login-title">Club Panel</h1>
                     <p className="login-subtitle">Club entry management</p>
                 </div>
 

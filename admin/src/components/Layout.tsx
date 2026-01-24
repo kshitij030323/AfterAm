@@ -23,7 +23,7 @@ export function Layout({ children }: LayoutProps) {
             <aside className="w-64 bg-neutral-900 border-r border-neutral-800 flex flex-col">
                 <div className="p-6 border-b border-neutral-800">
                     <div className="flex items-center gap-3">
-                        <img src="/clubin-logo.png" alt="Clubin" className="h-10 w-auto" />
+                        <img src="/clubin-logo.png" alt="Clubin" className="h-14 w-auto" />
                     </div>
                 </div>
 

@@ -10,7 +10,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="layout">
             <aside className="sidebar">
                 <div className="sidebar-header">
-                    <img src="/clubin-logo.png" alt="Clubin" className="sidebar-logo-img" style={{ height: '40px', width: 'auto' }} />
+                    <img src="/clubin-logo.png" alt="Clubin" className="sidebar-logo-img" style={{ height: '56px', width: 'auto' }} />
                 </div>
 
                 <ul className="nav-links">
