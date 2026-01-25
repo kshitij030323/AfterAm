@@ -341,7 +341,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                             <View style={styles.infoContent}>
                                 <Text style={styles.infoTitle}>Next Step</Text>
                                 <Text style={styles.infoText}>• Enter names of all guests</Text>
-                                <Text style={styles.infoText}>• Government ID is mandatory</Text>
+                                <Text style={styles.infoText}>• Government ID is mandatory at time of entry</Text>
                             </View>
                         </View>
                     )}
@@ -406,19 +406,39 @@ export function GuestlistScreen({ route, navigation }: any) {
                                     </View>
                                 ))}
 
-                                <View style={{ height: 100 }} />
+                                <View style={{ height: 180 }} />
                             </ScrollView>
 
-                            <View style={styles.modalFooter}>
+                            {/* Payment Summary in Modal */}
+                            <View style={styles.modalPaymentSection}>
+                                <View style={styles.modalPaymentSummary}>
+                                    <View style={styles.modalPaymentRow}>
+                                        <Text style={styles.modalPaymentLabel}>Order amount</Text>
+                                        <Text style={styles.modalPaymentValue}>₹{orderAmount.toFixed(2)}</Text>
+                                    </View>
+                                    <View style={styles.modalPaymentRow}>
+                                        <Text style={styles.modalPaymentLabel}>Convenience fee</Text>
+                                        <Text style={styles.modalPaymentValue}>₹{convenienceFee.toFixed(2)}</Text>
+                                    </View>
+                                    <View style={styles.modalPaymentDivider} />
+                                    <View style={styles.modalPaymentRow}>
+                                        <Text style={styles.modalPaymentTotalLabel}>Total</Text>
+                                        <Text style={styles.modalPaymentTotalValue}>₹{totalAmount.toFixed(2)}</Text>
+                                    </View>
+                                </View>
+
                                 <TouchableOpacity
-                                    style={styles.ctaButton}
+                                    style={styles.payButton}
                                     onPress={handleConfirm}
                                     disabled={loading}
                                 >
                                     {loading ? (
                                         <ActivityIndicator color="#fff" />
                                     ) : (
-                                        <Text style={styles.ctaText}>Confirm Booking</Text>
+                                        <>
+                                            <Text style={styles.payButtonText}>Pay ₹{totalAmount.toFixed(0)}</Text>
+                                            <Text style={styles.payButtonArrow}>›</Text>
+                                        </>
                                     )}
                                 </TouchableOpacity>
                             </View>
@@ -804,6 +824,71 @@ const styles = StyleSheet.create({
         paddingBottom: 36,
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.05)',
+    },
+    // Modal Payment Section styles
+    modalPaymentSection: {
+        backgroundColor: '#171717',
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+        padding: 20,
+        paddingBottom: 36,
+    },
+    modalPaymentSummary: {
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
+    },
+    modalPaymentRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    modalPaymentLabel: {
+        fontSize: 14,
+        color: '#a3a3a3',
+    },
+    modalPaymentValue: {
+        fontSize: 14,
+        color: '#e5e5e5',
+    },
+    modalPaymentDivider: {
+        height: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        marginVertical: 8,
+    },
+    modalPaymentTotalLabel: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#fff',
+    },
+    modalPaymentTotalValue: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#a855f7',
+    },
+    payButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#a855f7',
+        paddingVertical: 18,
+        paddingHorizontal: 24,
+        borderRadius: 16,
+    },
+    payButtonText: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#fff',
+    },
+    payButtonArrow: {
+        fontSize: 24,
+        fontWeight: '400',
+        color: '#fff',
+        marginLeft: 8,
     },
     // Platform Fee Modal styles
     platformFeeOverlay: {
