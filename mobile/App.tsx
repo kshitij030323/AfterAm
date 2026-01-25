@@ -41,42 +41,46 @@ const AppDarkTheme = {
 
 function HomeStack() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: '#0a0a0a' },
-        animation: 'slide_from_right',
-        animationDuration: 250,
-        gestureEnabled: true,
-        gestureDirection: 'horizontal',
-      }}
-    >
-      <Stack.Screen name="HomeList" component={HomeScreen} />
-      <Stack.Screen name="EventDetail" component={EventDetailScreen} />
-      <Stack.Screen name="Guestlist" component={GuestlistScreen} />
-      <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
-    </Stack.Navigator>
+    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#0a0a0a' },
+          animation: 'slide_from_right',
+          animationDuration: 250,
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+        }}
+      >
+        <Stack.Screen name="HomeList" component={HomeScreen} />
+        <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+        <Stack.Screen name="Guestlist" component={GuestlistScreen} />
+        <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
+      </Stack.Navigator>
+    </View>
   );
 }
 
 function ClubsStack() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: '#0a0a0a' },
-        animation: 'slide_from_right',
-        animationDuration: 250,
-        gestureEnabled: true,
-        gestureDirection: 'horizontal',
-      }}
-    >
-      <Stack.Screen name="ClubsList" component={ClubsScreen} />
-      <Stack.Screen name="ClubDetail" component={ClubDetailScreen} />
-      <Stack.Screen name="EventDetail" component={EventDetailScreen} />
-      <Stack.Screen name="Guestlist" component={GuestlistScreen} />
-      <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
-    </Stack.Navigator>
+    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#0a0a0a' },
+          animation: 'slide_from_right',
+          animationDuration: 250,
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+        }}
+      >
+        <Stack.Screen name="ClubsList" component={ClubsScreen} />
+        <Stack.Screen name="ClubDetail" component={ClubDetailScreen} />
+        <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+        <Stack.Screen name="Guestlist" component={GuestlistScreen} />
+        <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
+      </Stack.Navigator>
+    </View>
   );
 }
 
@@ -103,7 +107,10 @@ function MainTabs() {
         headerShown: false,
         tabBarShowLabel: false,
         lazy: false,
+        freezeOnBlur: false,
+        detachInactiveScreens: false,
         animation: 'fade',
+        sceneStyle: { backgroundColor: '#0a0a0a' },
         tabBarStyle: {
           position: 'absolute',
           backgroundColor: 'rgba(30, 15, 50, 0.15)',
