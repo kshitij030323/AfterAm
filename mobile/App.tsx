@@ -102,7 +102,7 @@ function MainTabs() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        lazy: true,
+        lazy: false,
         animation: 'fade',
         tabBarStyle: {
           position: 'absolute',
