@@ -77,6 +77,7 @@ export function GuestlistScreen({ route, navigation }: any) {
     const [showNamesModal, setShowNamesModal] = useState(false);
     const [guests, setGuests] = useState<Guest[]>([]);
     const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
+    const [showPlatformFeeModal, setShowPlatformFeeModal] = useState(false);
 
     const total = counts.couples * 2 + counts.ladies + counts.stags;
 
@@ -306,16 +307,18 @@ export function GuestlistScreen({ route, navigation }: any) {
                                 )}
 
                                 {/* Convenience Fee Row */}
-                                <View style={styles.paymentRow}>
+                                <TouchableOpacity
+                                    style={styles.paymentRow}
+                                    onPress={() => setShowPlatformFeeModal(true)}
+                                    activeOpacity={0.7}
+                                >
                                     <View style={styles.paymentRowLeft}>
-                                        <Text style={styles.paymentLabel}>Convenience fee</Text>
+                                        <Text style={styles.paymentLabelDotted}>Convenience fee</Text>
                                         <Text style={styles.paymentSubLabel}>
                                             (₹{PRICING.convenienceFee} × {total} guests)
                                         </Text>
                                     </View>
                                     <Text style={styles.paymentValue}>₹{convenienceFee.toFixed(2)}</Text>
-                                </View>
-
                                 {/* Divider */}
                                 <View style={styles.paymentDivider} />
 
@@ -417,6 +420,29 @@ export function GuestlistScreen({ route, navigation }: any) {
                             </View>
                         </KeyboardAvoidingView>
                     </SafeAreaView>
+                </Modal>
+
+                {/* Platform Fee Info Modal */}
+                <Modal
+                    visible={showPlatformFeeModal}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <View style={styles.platformFeeOverlay}>
+                        <View style={styles.platformFeeCard}>
+                            <Text style={styles.platformFeeTitle}>Platform Fee</Text>
+                            <Text style={styles.platformFeeDescription}>
+                                This small fee helps us pay the bills so that we can keep Clubin running.
+                            </Text>
+                            <View style={styles.platformFeeDivider} />
+                            <TouchableOpacity
+                                style={styles.platformFeeButton}
+                                onPress={() => setShowPlatformFeeModal(false)}
+                            >
+                                <Text style={styles.platformFeeButtonText}>OKAY</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </Modal>
             </SafeAreaView>
         </View>
@@ -566,6 +592,13 @@ const styles = StyleSheet.create({
     paymentLabel: {
         fontSize: 15,
         color: '#e5e5e5',
+    },
+    paymentLabelDotted: {
+        fontSize: 15,
+        color: '#e5e5e5',
+        textDecorationLine: 'underline',
+        textDecorationStyle: 'dotted',
+        textDecorationColor: '#737373',
     },
     paymentSubLabel: {
         fontSize: 12,
@@ -744,5 +777,47 @@ const styles = StyleSheet.create({
         paddingBottom: 36,
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.05)',
+    },
+    // Platform Fee Modal styles
+    platformFeeOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+    },
+    platformFeeCard: {
+        backgroundColor: '#1a1a1a',
+        borderRadius: 16,
+        padding: 24,
+        width: '100%',
+        maxWidth: 340,
+    },
+    platformFeeTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#f87171',
+        marginBottom: 16,
+    },
+    platformFeeDescription: {
+        fontSize: 18,
+        color: '#e5e5e5',
+        lineHeight: 28,
+        marginBottom: 20,
+    },
+    platformFeeDivider: {
+        height: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        marginBottom: 16,
+    },
+    platformFeeButton: {
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    platformFeeButtonText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#f87171',
+        letterSpacing: 1,
     },
 });
