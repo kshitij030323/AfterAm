@@ -15,6 +15,8 @@ import {
     StatusBar,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, Info, Minus, Plus, X, ChevronDown, ChevronUp } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
@@ -430,21 +432,44 @@ export function GuestlistScreen({ route, navigation }: any) {
                     animationType="fade"
                     transparent={true}
                 >
-                    <View style={styles.platformFeeOverlay}>
-                        <View style={styles.platformFeeCard}>
-                            <Text style={styles.platformFeeTitle}>Platform Fee</Text>
-                            <Text style={styles.platformFeeDescription}>
-                                This small fee helps us pay the bills so that we can keep Clubin running.
-                            </Text>
-                            <View style={styles.platformFeeDivider} />
-                            <TouchableOpacity
-                                style={styles.platformFeeButton}
-                                onPress={() => setShowPlatformFeeModal(false)}
+                    <TouchableOpacity
+                        style={styles.platformFeeOverlay}
+                        activeOpacity={1}
+                        onPress={() => setShowPlatformFeeModal(false)}
+                    >
+                        <TouchableOpacity
+                            activeOpacity={1}
+                            onPress={(e) => e.stopPropagation()}
+                            style={styles.platformFeeCardContainer}
+                        >
+                            <BlurView
+                                intensity={80}
+                                tint="dark"
+                                style={styles.platformFeeBlur}
                             >
-                                <Text style={styles.platformFeeButtonText}>OKAY</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                                <LinearGradient
+                                    colors={['rgba(139, 92, 246, 0.2)', 'rgba(88, 28, 135, 0.3)', 'rgba(49, 10, 101, 0.4)']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.platformFeeGradient}
+                                >
+                                    <View style={styles.platformFeeContent}>
+                                        <Text style={styles.platformFeeTitle}>Platform Fee</Text>
+                                        <Text style={styles.platformFeeDescription}>
+                                            This small fee helps us pay the bills so that we can keep Clubin running.
+                                        </Text>
+                                        <View style={styles.platformFeeDivider} />
+                                        <TouchableOpacity
+                                            style={styles.platformFeeButton}
+                                            onPress={() => setShowPlatformFeeModal(false)}
+                                        >
+                                            <Text style={styles.platformFeeButtonText}>OKAY</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </LinearGradient>
+                            </BlurView>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
                 </Modal>
             </SafeAreaView>
         </View>
@@ -783,43 +808,57 @@ const styles = StyleSheet.create({
     // Platform Fee Modal styles
     platformFeeOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         justifyContent: 'center',
         alignItems: 'center',
         padding: 24,
     },
-    platformFeeCard: {
-        backgroundColor: '#1a1a1a',
-        borderRadius: 16,
-        padding: 24,
+    platformFeeCardContainer: {
         width: '100%',
         maxWidth: 340,
+        borderRadius: 24,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(167, 139, 250, 0.3)',
+    },
+    platformFeeBlur: {
+        overflow: 'hidden',
+    },
+    platformFeeGradient: {
+        padding: 24,
+    },
+    platformFeeContent: {
+        // Content container
     },
     platformFeeTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#f87171',
+        color: '#c4b5fd',
         marginBottom: 16,
     },
     platformFeeDescription: {
-        fontSize: 18,
+        fontSize: 17,
         color: '#e5e5e5',
-        lineHeight: 28,
-        marginBottom: 20,
+        lineHeight: 26,
+        marginBottom: 24,
     },
     platformFeeDivider: {
         height: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'rgba(167, 139, 250, 0.25)',
         marginBottom: 16,
     },
     platformFeeButton: {
         alignItems: 'center',
-        paddingVertical: 8,
+        paddingVertical: 12,
+        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(167, 139, 250, 0.3)',
     },
     platformFeeButtonText: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: '700',
-        color: '#f87171',
+        color: '#a855f7',
         letterSpacing: 1,
     },
 });
