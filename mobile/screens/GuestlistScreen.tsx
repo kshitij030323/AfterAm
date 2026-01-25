@@ -346,7 +346,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                         </View>
                     )}
 
-                    <View style={{ height: 120 }} />
+                    <View style={{ height: 180 }} />
                 </ScrollView>
 
                 <View style={styles.footer}>
