@@ -117,6 +117,28 @@ export const ClubDetailEventsSkeleton = () => (
     </View>
 );
 
+// Booking Card Skeleton
+const BookingCardSkeleton = () => (
+    <View style={styles.bookingCard}>
+        <SkeletonBox style={styles.bookingImage} />
+        <View style={styles.bookingContent}>
+            <SkeletonBox style={styles.bookingTitle} />
+            <SkeletonBox style={styles.bookingClub} />
+            <SkeletonBox style={styles.bookingGuests} />
+        </View>
+    </View>
+);
+
+// Bookings Screen Loading Skeleton
+export const BookingsScreenSkeleton = () => (
+    <View style={styles.bookingsContainer}>
+        <BookingCardSkeleton />
+        <BookingCardSkeleton />
+        <BookingCardSkeleton />
+        <BookingCardSkeleton />
+    </View>
+);
+
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 20,
@@ -266,5 +288,45 @@ const styles = StyleSheet.create({
         width: 80,
         height: 16,
         borderRadius: 4,
+    },
+    // Bookings Screen styles
+    bookingsContainer: {
+        paddingHorizontal: 20,
+        paddingTop: 0,
+    },
+    bookingCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
+    },
+    bookingImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+    },
+    bookingContent: {
+        flex: 1,
+        marginLeft: 16,
+        gap: 8,
+    },
+    bookingTitle: {
+        width: '70%',
+        height: 20,
+        borderRadius: 4,
+    },
+    bookingClub: {
+        width: '50%',
+        height: 16,
+        borderRadius: 4,
+    },
+    bookingGuests: {
+        width: '60%',
+        height: 32,
+        borderRadius: 8,
     },
 });
