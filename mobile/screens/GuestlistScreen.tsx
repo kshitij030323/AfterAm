@@ -15,7 +15,7 @@ import {
     StatusBar,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { ChevronLeft, Info, Minus, Plus, X, User } from 'lucide-react-native';
+import { ChevronLeft, Info, Minus, Plus, X, ChevronDown, ChevronUp } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
 import { AppBackground } from '../components/AppBackground';
@@ -61,6 +61,14 @@ const GUEST_TYPES = [
     { key: 'stags', label: 'Stags (Male)', sub: 'Cover charge applies', IconComponent: MaleSymbol },
 ] as const;
 
+// Pricing constants (in rupees)
+const PRICING = {
+    couples: 0,      // Price per couple (will be configurable from club panel)
+    ladies: 0,       // Price per lady
+    stags: 0,        // Price per stag
+    convenienceFee: 30, // Convenience fee per person (all inclusive)
+};
+
 export function GuestlistScreen({ route, navigation }: any) {
     const { event } = route.params as { event: Event };
     const { user } = useAuth();
@@ -68,8 +76,17 @@ export function GuestlistScreen({ route, navigation }: any) {
     const [counts, setCounts] = useState({ couples: 0, ladies: 0, stags: 0 });
     const [showNamesModal, setShowNamesModal] = useState(false);
     const [guests, setGuests] = useState<Guest[]>([]);
+    const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
 
     const total = counts.couples * 2 + counts.ladies + counts.stags;
+
+    // Calculate pricing
+    const orderAmount =
+        (counts.couples * PRICING.couples) +
+        (counts.ladies * PRICING.ladies) +
+        (counts.stags * PRICING.stags);
+    const convenienceFee = total * PRICING.convenienceFee;
+    const totalAmount = orderAmount + convenienceFee;
 
     const updateCount = (key: keyof typeof counts, delta: number) => {
         setCounts((prev) => ({
@@ -228,6 +245,88 @@ export function GuestlistScreen({ route, navigation }: any) {
                             </View>
                         ))}
                     </View>
+
+                    {/* Payment Summary */}
+                    {total > 0 && (
+                        <View style={styles.paymentSummary}>
+                            <Text style={styles.paymentTitle}>Payment Summary</Text>
+
+                            <View style={styles.paymentCard}>
+                                {/* Order Amount Row */}
+                                <TouchableOpacity
+                                    style={styles.paymentRow}
+                                    onPress={() => setShowPriceBreakdown(!showPriceBreakdown)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={styles.paymentRowLeft}>
+                                        <Text style={styles.paymentLabel}>Order amount</Text>
+                                        {orderAmount > 0 && (
+                                            showPriceBreakdown ?
+                                                <ChevronUp color="#737373" size={18} /> :
+                                                <ChevronDown color="#737373" size={18} />
+                                        )}
+                                    </View>
+                                    <Text style={styles.paymentValue}>₹{orderAmount.toFixed(2)}</Text>
+                                </TouchableOpacity>
+
+                                {/* Order Breakdown (expandable) */}
+                                {showPriceBreakdown && orderAmount > 0 && (
+                                    <View style={styles.paymentBreakdown}>
+                                        {counts.couples > 0 && (
+                                            <View style={styles.breakdownRow}>
+                                                <Text style={styles.breakdownLabel}>
+                                                    Couples × {counts.couples}
+                                                </Text>
+                                                <Text style={styles.breakdownValue}>
+                                                    ₹{(counts.couples * PRICING.couples).toFixed(2)}
+                                                </Text>
+                                            </View>
+                                        )}
+                                        {counts.ladies > 0 && (
+                                            <View style={styles.breakdownRow}>
+                                                <Text style={styles.breakdownLabel}>
+                                                    Ladies × {counts.ladies}
+                                                </Text>
+                                                <Text style={styles.breakdownValue}>
+                                                    ₹{(counts.ladies * PRICING.ladies).toFixed(2)}
+                                                </Text>
+                                            </View>
+                                        )}
+                                        {counts.stags > 0 && (
+                                            <View style={styles.breakdownRow}>
+                                                <Text style={styles.breakdownLabel}>
+                                                    Stags × {counts.stags}
+                                                </Text>
+                                                <Text style={styles.breakdownValue}>
+                                                    ₹{(counts.stags * PRICING.stags).toFixed(2)}
+                                                </Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                )}
+
+                                {/* Convenience Fee Row */}
+                                <View style={styles.paymentRow}>
+                                    <View style={styles.paymentRowLeft}>
+                                        <Text style={styles.paymentLabel}>Convenience fee</Text>
+                                        <Text style={styles.paymentSubLabel}>
+                                            (₹{PRICING.convenienceFee} × {total} guests)
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.paymentValue}>₹{convenienceFee.toFixed(2)}</Text>
+                                </View>
+
+                                {/* Divider */}
+                                <View style={styles.paymentDivider} />
+
+                                {/* Total Row */}
+                                <View style={styles.paymentRowTotal}>
+                                    <Text style={styles.paymentTotalLabel}>To be paid</Text>
+                                    <Text style={styles.paymentTotalValue}>₹{totalAmount.toFixed(2)}</Text>
+                                </View>
+                            </View>
+                        </View>
+                    )}
 
                     {total > 0 && (
                         <View style={styles.infoCard}>
@@ -436,13 +535,97 @@ const styles = StyleSheet.create({
         width: 32,
         textAlign: 'center',
     },
+    // Payment Summary styles
+    paymentSummary: {
+        marginTop: 24,
+    },
+    paymentTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#fff',
+        marginBottom: 12,
+    },
+    paymentCard: {
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
+    },
+    paymentRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    paymentRowLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    paymentLabel: {
+        fontSize: 15,
+        color: '#e5e5e5',
+    },
+    paymentSubLabel: {
+        fontSize: 12,
+        color: '#737373',
+        marginLeft: 4,
+    },
+    paymentValue: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#fff',
+    },
+    paymentBreakdown: {
+        paddingLeft: 16,
+        paddingBottom: 8,
+        borderLeftWidth: 2,
+        borderLeftColor: 'rgba(139, 92, 246, 0.3)',
+        marginLeft: 8,
+        marginBottom: 8,
+    },
+    breakdownRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 6,
+    },
+    breakdownLabel: {
+        fontSize: 13,
+        color: '#a3a3a3',
+    },
+    breakdownValue: {
+        fontSize: 13,
+        color: '#a3a3a3',
+    },
+    paymentDivider: {
+        height: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        marginVertical: 8,
+    },
+    paymentRowTotal: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    paymentTotalLabel: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#fff',
+    },
+    paymentTotalValue: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#a855f7',
+    },
     infoCard: {
         flexDirection: 'row',
         gap: 12,
         backgroundColor: 'rgba(168, 85, 247, 0.1)',
         padding: 16,
         borderRadius: 16,
-        marginTop: 24,
+        marginTop: 16,
         borderWidth: 1,
         borderColor: 'rgba(168, 85, 247, 0.2)',
     },
