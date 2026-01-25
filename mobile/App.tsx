@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -23,7 +23,8 @@ import { OnboardingScreen } from './screens/OnboardingScreen';
 import { AnimatedSplashScreen } from './components/AnimatedSplashScreen';
 
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
+const HomeStackNav = createNativeStackNavigator();
+const ClubsStackNav = createNativeStackNavigator();
 
 // Custom dark theme to prevent white flash on Android
 const AppDarkTheme = {
@@ -39,50 +40,46 @@ const AppDarkTheme = {
   },
 };
 
-function HomeStack() {
-  return (
-    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: '#0a0a0a' },
-          animation: 'slide_from_right',
-          animationDuration: 250,
-          gestureEnabled: true,
-          gestureDirection: 'horizontal',
-        }}
-      >
-        <Stack.Screen name="HomeList" component={HomeScreen} />
-        <Stack.Screen name="EventDetail" component={EventDetailScreen} />
-        <Stack.Screen name="Guestlist" component={GuestlistScreen} />
-        <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
-      </Stack.Navigator>
-    </View>
-  );
-}
+const stackScreenOptions = {
+  headerShown: false,
+  contentStyle: { backgroundColor: '#0a0a0a' },
+  animation: 'slide_from_right' as const,
+  animationDuration: 250,
+  gestureEnabled: true,
+  gestureDirection: 'horizontal' as const,
+};
 
-function ClubsStack() {
+const HomeStack = memo(function HomeStack() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: '#0a0a0a' },
-          animation: 'slide_from_right',
-          animationDuration: 250,
-          gestureEnabled: true,
-          gestureDirection: 'horizontal',
-        }}
-      >
-        <Stack.Screen name="ClubsList" component={ClubsScreen} />
-        <Stack.Screen name="ClubDetail" component={ClubDetailScreen} />
-        <Stack.Screen name="EventDetail" component={EventDetailScreen} />
-        <Stack.Screen name="Guestlist" component={GuestlistScreen} />
-        <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
-      </Stack.Navigator>
-    </View>
+    <HomeStackNav.Navigator screenOptions={stackScreenOptions}>
+      <HomeStackNav.Screen name="HomeList" component={HomeScreen} />
+      <HomeStackNav.Screen name="EventDetail" component={EventDetailScreen} />
+      <HomeStackNav.Screen name="Guestlist" component={GuestlistScreen} />
+      <HomeStackNav.Screen name="Confirmation" component={ConfirmationScreen} />
+    </HomeStackNav.Navigator>
   );
-}
+});
+
+const ClubsStack = memo(function ClubsStack() {
+  return (
+    <ClubsStackNav.Navigator screenOptions={stackScreenOptions}>
+      <ClubsStackNav.Screen name="ClubsList" component={ClubsScreen} />
+      <ClubsStackNav.Screen name="ClubDetail" component={ClubDetailScreen} />
+      <ClubsStackNav.Screen name="EventDetail" component={EventDetailScreen} />
+      <ClubsStackNav.Screen name="Guestlist" component={GuestlistScreen} />
+      <ClubsStackNav.Screen name="Confirmation" component={ConfirmationScreen} />
+    </ClubsStackNav.Navigator>
+  );
+});
+
+// Wrapped screen components to ensure they always have the correct container
+const BookingsScreenWrapper = memo(function BookingsScreenWrapper(props: any) {
+  return <BookingsScreen {...props} />;
+});
+
+const ProfileScreenWrapper = memo(function ProfileScreenWrapper(props: any) {
+  return <ProfileScreen {...props} />;
+});
 
 // Custom tab bar icon with purple glass effect for active state
 function TabIcon({ IconComponent, focused, size }: { IconComponent: any; focused: boolean; size: number }) {
@@ -109,7 +106,7 @@ function MainTabs() {
         lazy: false,
         freezeOnBlur: false,
         detachInactiveScreens: false,
-        animation: 'fade',
+        animation: 'none',
         sceneStyle: { backgroundColor: '#0a0a0a' },
         tabBarStyle: {
           position: 'absolute',
@@ -148,6 +145,7 @@ function MainTabs() {
         name="Home"
         component={HomeStack}
         options={{
+          unmountOnBlur: false,
           tabBarIcon: ({ focused }) => (
             <TabIcon IconComponent={Home} focused={focused} size={22} />
           ),
@@ -157,6 +155,7 @@ function MainTabs() {
         name="Clubs"
         component={ClubsStack}
         options={{
+          unmountOnBlur: false,
           tabBarIcon: ({ focused }) => (
             <TabIcon IconComponent={MapPinPlus} focused={focused} size={22} />
           ),
@@ -164,8 +163,9 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Bookings"
-        component={BookingsScreen}
+        component={BookingsScreenWrapper}
         options={{
+          unmountOnBlur: false,
           tabBarIcon: ({ focused }) => (
             <TabIcon IconComponent={Ticket} focused={focused} size={22} />
           ),
@@ -173,8 +173,9 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileScreenWrapper}
         options={{
+          unmountOnBlur: false,
           tabBarIcon: ({ focused }) => (
             <TabIcon IconComponent={User} focused={focused} size={22} />
           ),
