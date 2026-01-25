@@ -16,6 +16,7 @@ import { Ticket, CheckCircle } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
 import { AppBackground } from '../components/AppBackground';
+import { BookingsScreenSkeleton } from '../components/SkeletonLoader';
 
 // Local Booking type
 interface Booking {
@@ -124,38 +125,41 @@ export function BookingsScreen({ navigation }: any) {
                     <Text style={styles.title}>My Tickets</Text>
                 </View>
 
-                {bookings.length === 0 && !loading ? (
-                    <View style={styles.empty}>
-                        <View style={styles.emptyIcon}>
-                            <Ticket color="#525252" size={40} />
-                        </View>
-                        <Text style={styles.emptyText}>No upcoming plans</Text>
-                        <TouchableOpacity
-                            style={styles.emptyButton}
-                            onPress={() => navigation.navigate('Home')}
-                        >
-                            <Text style={styles.emptyButtonText}>Find an Event</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <FlatList
-                        data={bookings}
-                        renderItem={renderBookingCard}
-                        keyExtractor={(item) => item.id}
-                        contentContainerStyle={styles.list}
-                        showsVerticalScrollIndicator={false}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refreshing}
-                                onRefresh={() => {
-                                    setRefreshing(true);
-                                    fetchBookings();
-                                }}
-                                tintColor="#a855f7"
-                            />
-                        }
-                    />
-                )}
+                <FlatList
+                    data={bookings}
+                    renderItem={renderBookingCard}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={bookings.length === 0 ? styles.emptyList : styles.list}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => {
+                                setRefreshing(true);
+                                fetchBookings();
+                            }}
+                            tintColor="#a855f7"
+                        />
+                    }
+                    ListEmptyComponent={
+                        loading ? (
+                            <BookingsScreenSkeleton />
+                        ) : (
+                            <View style={styles.empty}>
+                                <View style={styles.emptyIcon}>
+                                    <Ticket color="#525252" size={40} />
+                                </View>
+                                <Text style={styles.emptyText}>No upcoming plans</Text>
+                                <TouchableOpacity
+                                    style={styles.emptyButton}
+                                    onPress={() => navigation.navigate('Home')}
+                                >
+                                    <Text style={styles.emptyButtonText}>Find an Event</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )
+                    }
+                />
             </SafeAreaView>
         </View >
     );
@@ -182,6 +186,11 @@ const styles = StyleSheet.create({
         padding: 20,
         paddingTop: 0,
         paddingBottom: 120,
+    },
+    emptyList: {
+        padding: 20,
+        paddingTop: 0,
+        flexGrow: 1,
     },
     card: {
         flexDirection: 'row',

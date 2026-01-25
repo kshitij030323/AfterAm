@@ -143,7 +143,7 @@ export function ProfileScreen() {
                             <View style={styles.avatarGradient}>
                                 <View style={styles.avatar}>
                                     <Text style={styles.avatarText}>
-                                        {user?.name[0]?.toUpperCase() || '?'}
+                                        {user?.name?.[0]?.toUpperCase() || '?'}
                                     </Text>
                                 </View>
                             </View>
