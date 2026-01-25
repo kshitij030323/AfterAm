@@ -319,6 +319,8 @@ export function GuestlistScreen({ route, navigation }: any) {
                                         </Text>
                                     </View>
                                     <Text style={styles.paymentValue}>₹{convenienceFee.toFixed(2)}</Text>
+                                </TouchableOpacity>
+
                                 {/* Divider */}
                                 <View style={styles.paymentDivider} />
 
