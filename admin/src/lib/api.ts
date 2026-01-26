@@ -75,6 +75,9 @@ export interface Event {
     gallery?: string[];
     price: number;
     priceLabel: string;
+    stagPrice: number;
+    couplePrice: number;
+    ladiesPrice: number;
     date: string;
     startTime: string;
     endTime: string;
@@ -100,6 +103,9 @@ export interface EventInput {
     gallery?: string[];
     price: number;
     priceLabel: string;
+    stagPrice: number;
+    couplePrice: number;
+    ladiesPrice: number;
     date: string;
     startTime: string;
     endTime: string;

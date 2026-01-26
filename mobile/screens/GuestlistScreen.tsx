@@ -29,6 +29,9 @@ interface Event {
     imageUrl: string;
     date: string;
     time: string;
+    stagPrice?: number;
+    couplePrice?: number;
+    ladiesPrice?: number;
 }
 
 interface Guest {
@@ -58,18 +61,13 @@ const CoupleSymbol = () => (
 );
 
 const GUEST_TYPES = [
-    { key: 'couples', label: 'Couples', sub: 'Free entry till 9:30 PM', IconComponent: CoupleSymbol },
-    { key: 'ladies', label: 'Ladies', sub: 'Free entry all night', IconComponent: FemaleSymbol },
-    { key: 'stags', label: 'Stags (Male)', sub: 'Cover charge applies', IconComponent: MaleSymbol },
+    { key: 'couples', label: 'Couples', IconComponent: CoupleSymbol },
+    { key: 'ladies', label: 'Ladies', IconComponent: FemaleSymbol },
+    { key: 'stags', label: 'Stags (Male)', IconComponent: MaleSymbol },
 ] as const;
 
-// Pricing constants (in rupees)
-const PRICING = {
-    couples: 0,      // Price per couple (will be configurable from club panel)
-    ladies: 0,       // Price per lady
-    stags: 0,        // Price per stag
-    convenienceFee: 30, // Convenience fee per person (all inclusive)
-};
+// Convenience fee per person (all inclusive)
+const CONVENIENCE_FEE = 30;
 
 export function GuestlistScreen({ route, navigation }: any) {
     const { event } = route.params as { event: Event };
@@ -83,12 +81,16 @@ export function GuestlistScreen({ route, navigation }: any) {
 
     const total = counts.couples * 2 + counts.ladies + counts.stags;
 
-    // Calculate pricing
+    // Calculate pricing using event prices (default to 0 if not set)
+    const couplePrice = event.couplePrice ?? 0;
+    const ladiesPrice = event.ladiesPrice ?? 0;
+    const stagPrice = event.stagPrice ?? 0;
+
     const orderAmount =
-        (counts.couples * PRICING.couples) +
-        (counts.ladies * PRICING.ladies) +
-        (counts.stags * PRICING.stags);
-    const convenienceFee = total * PRICING.convenienceFee;
+        (counts.couples * couplePrice) +
+        (counts.ladies * ladiesPrice) +
+        (counts.stags * stagPrice);
+    const convenienceFee = total * CONVENIENCE_FEE;
     const totalAmount = orderAmount + convenienceFee;
 
     const updateCount = (key: keyof typeof counts, delta: number) => {
@@ -197,6 +199,12 @@ export function GuestlistScreen({ route, navigation }: any) {
         return <MaleSymbol />;
     };
 
+    const getGuestTypeSub = (key: string) => {
+        if (key === 'couples') return couplePrice > 0 ? `₹${couplePrice} per couple` : 'Free entry';
+        if (key === 'ladies') return ladiesPrice > 0 ? `₹${ladiesPrice} per person` : 'Free entry';
+        return stagPrice > 0 ? `₹${stagPrice} per person` : 'Free entry';
+    };
+
     return (
         <View style={styles.container}>
             <AppBackground />
@@ -227,7 +235,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                                     <type.IconComponent />
                                     <View>
                                         <Text style={styles.counterLabel}>{type.label}</Text>
-                                        <Text style={styles.counterSub}>{type.sub}</Text>
+                                        <Text style={styles.counterSub}>{getGuestTypeSub(type.key)}</Text>
                                     </View>
                                 </View>
                                 <View style={styles.counterControls}>
@@ -281,7 +289,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                                                     Couples × {counts.couples}
                                                 </Text>
                                                 <Text style={styles.breakdownValue}>
-                                                    ₹{(counts.couples * PRICING.couples).toFixed(2)}
+                                                    ₹{(counts.couples * couplePrice).toFixed(2)}
                                                 </Text>
                                             </View>
                                         )}
@@ -291,7 +299,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                                                     Ladies × {counts.ladies}
                                                 </Text>
                                                 <Text style={styles.breakdownValue}>
-                                                    ₹{(counts.ladies * PRICING.ladies).toFixed(2)}
+                                                    ₹{(counts.ladies * ladiesPrice).toFixed(2)}
                                                 </Text>
                                             </View>
                                         )}
@@ -301,7 +309,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                                                     Stags × {counts.stags}
                                                 </Text>
                                                 <Text style={styles.breakdownValue}>
-                                                    ₹{(counts.stags * PRICING.stags).toFixed(2)}
+                                                    ₹{(counts.stags * stagPrice).toFixed(2)}
                                                 </Text>
                                             </View>
                                         )}
@@ -317,7 +325,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                                     <View style={styles.paymentRowLeft}>
                                         <Text style={styles.paymentLabelDotted}>Convenience fee</Text>
                                         <Text style={styles.paymentSubLabel}>
-                                            (₹{PRICING.convenienceFee} × {total} guests)
+                                            (₹{CONVENIENCE_FEE} × {total} guests)
                                         </Text>
                                     </View>
                                     <Text style={styles.paymentValue}>₹{convenienceFee.toFixed(2)}</Text>

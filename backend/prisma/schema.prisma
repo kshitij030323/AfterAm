@@ -54,6 +54,9 @@ model Event {
   gallery          String[] // Array of gallery image URLs
   price            Float    @default(0)
   priceLabel       String   @default("Free Entry")
+  stagPrice        Float    @default(0)
+  couplePrice      Float    @default(0)
+  ladiesPrice      Float    @default(0)
   date             DateTime
   startTime        String
   endTime          String

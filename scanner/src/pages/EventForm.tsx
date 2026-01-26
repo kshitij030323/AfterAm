@@ -18,6 +18,9 @@ interface EventForm {
     gallery: string[];
     price: number;
     priceLabel: string;
+    stagPrice: number;
+    couplePrice: number;
+    ladiesPrice: number;
     date: string;
     startTime: string;
     endTime: string;
@@ -48,6 +51,9 @@ export function EventForm() {
         gallery: [],
         price: 0,
         priceLabel: 'Free Entry',
+        stagPrice: 0,
+        couplePrice: 0,
+        ladiesPrice: 0,
         date: new Date().toISOString().split('T')[0],
         startTime: '20:00',
         endTime: '01:00',
@@ -74,6 +80,9 @@ export function EventForm() {
                             gallery: event.gallery || [],
                             price: event.price,
                             priceLabel: event.priceLabel,
+                            stagPrice: event.stagPrice ?? 0,
+                            couplePrice: event.couplePrice ?? 0,
+                            ladiesPrice: event.ladiesPrice ?? 0,
                             date: event.date.split('T')[0],
                             startTime: event.startTime,
                             endTime: event.endTime,
@@ -333,6 +342,39 @@ export function EventForm() {
                                 value={form.priceLabel}
                                 onChange={(e) => updateField('priceLabel', e.target.value)}
                                 placeholder="e.g. Free Entry, ₹500 Cover"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label>Stag Entry (₹)</label>
+                            <input
+                                type="number"
+                                value={form.stagPrice}
+                                onChange={(e) => updateField('stagPrice', Number(e.target.value))}
+                                min={0}
+                                placeholder="0"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Couple Entry (₹)</label>
+                            <input
+                                type="number"
+                                value={form.couplePrice}
+                                onChange={(e) => updateField('couplePrice', Number(e.target.value))}
+                                min={0}
+                                placeholder="0"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Ladies Entry (₹)</label>
+                            <input
+                                type="number"
+                                value={form.ladiesPrice}
+                                onChange={(e) => updateField('ladiesPrice', Number(e.target.value))}
+                                min={0}
+                                placeholder="0"
                             />
                         </div>
                     </div>
