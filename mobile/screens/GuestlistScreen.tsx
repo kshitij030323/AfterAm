@@ -839,7 +839,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.1)',
         padding: 20,
-        paddingBottom: 36,
+        paddingBottom: 48,
     },
     modalPaymentSummary: {
         backgroundColor: 'rgba(60, 40, 80, 0.4)',
