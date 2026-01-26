@@ -15,7 +15,9 @@ import {
     StatusBar,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { ChevronLeft, Info, Minus, Plus, X, User } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ChevronLeft, Info, Minus, Plus, X, ChevronDown, ChevronUp } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
 import { AppBackground } from '../components/AppBackground';
@@ -27,6 +29,9 @@ interface Event {
     imageUrl: string;
     date: string;
     time: string;
+    stagPrice?: number;
+    couplePrice?: number;
+    ladiesPrice?: number;
 }
 
 interface Guest {
@@ -56,10 +61,13 @@ const CoupleSymbol = () => (
 );
 
 const GUEST_TYPES = [
-    { key: 'couples', label: 'Couples', sub: 'Free entry till 9:30 PM', IconComponent: CoupleSymbol },
-    { key: 'ladies', label: 'Ladies', sub: 'Free entry all night', IconComponent: FemaleSymbol },
-    { key: 'stags', label: 'Stags (Male)', sub: 'Cover charge applies', IconComponent: MaleSymbol },
+    { key: 'couples', label: 'Couples', IconComponent: CoupleSymbol },
+    { key: 'ladies', label: 'Ladies', IconComponent: FemaleSymbol },
+    { key: 'stags', label: 'Stags (Male)', IconComponent: MaleSymbol },
 ] as const;
+
+// Convenience fee per person (all inclusive)
+const CONVENIENCE_FEE = 30;
 
 export function GuestlistScreen({ route, navigation }: any) {
     const { event } = route.params as { event: Event };
@@ -68,8 +76,22 @@ export function GuestlistScreen({ route, navigation }: any) {
     const [counts, setCounts] = useState({ couples: 0, ladies: 0, stags: 0 });
     const [showNamesModal, setShowNamesModal] = useState(false);
     const [guests, setGuests] = useState<Guest[]>([]);
+    const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
+    const [showPlatformFeeModal, setShowPlatformFeeModal] = useState(false);
 
     const total = counts.couples * 2 + counts.ladies + counts.stags;
+
+    // Calculate pricing using event prices (default to 0 if not set)
+    const couplePrice = event.couplePrice ?? 0;
+    const ladiesPrice = event.ladiesPrice ?? 0;
+    const stagPrice = event.stagPrice ?? 0;
+
+    const orderAmount =
+        (counts.couples * couplePrice) +
+        (counts.ladies * ladiesPrice) +
+        (counts.stags * stagPrice);
+    const convenienceFee = total * CONVENIENCE_FEE;
+    const totalAmount = orderAmount + convenienceFee;
 
     const updateCount = (key: keyof typeof counts, delta: number) => {
         setCounts((prev) => ({
@@ -177,6 +199,12 @@ export function GuestlistScreen({ route, navigation }: any) {
         return <MaleSymbol />;
     };
 
+    const getGuestTypeSub = (key: string) => {
+        if (key === 'couples') return couplePrice > 0 ? `₹${couplePrice} per couple` : 'Free entry';
+        if (key === 'ladies') return ladiesPrice > 0 ? `₹${ladiesPrice} per person` : 'Free entry';
+        return stagPrice > 0 ? `₹${stagPrice} per person` : 'Free entry';
+    };
+
     return (
         <View style={styles.container}>
             <AppBackground />
@@ -207,7 +235,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                                     <type.IconComponent />
                                     <View>
                                         <Text style={styles.counterLabel}>{type.label}</Text>
-                                        <Text style={styles.counterSub}>{type.sub}</Text>
+                                        <Text style={styles.counterSub}>{getGuestTypeSub(type.key)}</Text>
                                     </View>
                                 </View>
                                 <View style={styles.counterControls}>
@@ -229,18 +257,104 @@ export function GuestlistScreen({ route, navigation }: any) {
                         ))}
                     </View>
 
+                    {/* Payment Summary */}
+                    {total > 0 && (
+                        <View style={styles.paymentSummary}>
+                            <Text style={styles.paymentTitle}>Payment Summary</Text>
+
+                            <View style={styles.paymentCard}>
+                                {/* Order Amount Row */}
+                                <TouchableOpacity
+                                    style={styles.paymentRow}
+                                    onPress={() => setShowPriceBreakdown(!showPriceBreakdown)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={styles.paymentRowLeft}>
+                                        <Text style={styles.paymentLabel}>Order amount</Text>
+                                        {orderAmount > 0 && (
+                                            showPriceBreakdown ?
+                                                <ChevronUp color="#737373" size={18} /> :
+                                                <ChevronDown color="#737373" size={18} />
+                                        )}
+                                    </View>
+                                    <Text style={styles.paymentValue}>₹{orderAmount.toFixed(2)}</Text>
+                                </TouchableOpacity>
+
+                                {/* Order Breakdown (expandable) */}
+                                {showPriceBreakdown && orderAmount > 0 && (
+                                    <View style={styles.paymentBreakdown}>
+                                        {counts.couples > 0 && (
+                                            <View style={styles.breakdownRow}>
+                                                <Text style={styles.breakdownLabel}>
+                                                    Couples × {counts.couples}
+                                                </Text>
+                                                <Text style={styles.breakdownValue}>
+                                                    ₹{(counts.couples * couplePrice).toFixed(2)}
+                                                </Text>
+                                            </View>
+                                        )}
+                                        {counts.ladies > 0 && (
+                                            <View style={styles.breakdownRow}>
+                                                <Text style={styles.breakdownLabel}>
+                                                    Ladies × {counts.ladies}
+                                                </Text>
+                                                <Text style={styles.breakdownValue}>
+                                                    ₹{(counts.ladies * ladiesPrice).toFixed(2)}
+                                                </Text>
+                                            </View>
+                                        )}
+                                        {counts.stags > 0 && (
+                                            <View style={styles.breakdownRow}>
+                                                <Text style={styles.breakdownLabel}>
+                                                    Stags × {counts.stags}
+                                                </Text>
+                                                <Text style={styles.breakdownValue}>
+                                                    ₹{(counts.stags * stagPrice).toFixed(2)}
+                                                </Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                )}
+
+                                {/* Convenience Fee Row */}
+                                <TouchableOpacity
+                                    style={styles.paymentRow}
+                                    onPress={() => setShowPlatformFeeModal(true)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={styles.paymentRowLeft}>
+                                        <Text style={styles.paymentLabelDotted}>Convenience fee</Text>
+                                        <Text style={styles.paymentSubLabel}>
+                                            (₹{CONVENIENCE_FEE} × {total} guests)
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.paymentValue}>₹{convenienceFee.toFixed(2)}</Text>
+                                </TouchableOpacity>
+
+                                {/* Divider */}
+                                <View style={styles.paymentDivider} />
+
+                                {/* Total Row */}
+                                <View style={styles.paymentRowTotal}>
+                                    <Text style={styles.paymentTotalLabel}>To be paid</Text>
+                                    <Text style={styles.paymentTotalValue}>₹{totalAmount.toFixed(2)}</Text>
+                                </View>
+                            </View>
+                        </View>
+                    )}
+
                     {total > 0 && (
                         <View style={styles.infoCard}>
                             <Info color="#a855f7" size={18} />
                             <View style={styles.infoContent}>
                                 <Text style={styles.infoTitle}>Next Step</Text>
                                 <Text style={styles.infoText}>• Enter names of all guests</Text>
-                                <Text style={styles.infoText}>• Government ID is mandatory</Text>
+                                <Text style={styles.infoText}>• Government ID is mandatory at time of entry</Text>
                             </View>
                         </View>
                     )}
 
-                    <View style={{ height: 120 }} />
+                    <View style={{ height: 180 }} />
                 </ScrollView>
 
                 <View style={styles.footer}>
@@ -300,24 +414,90 @@ export function GuestlistScreen({ route, navigation }: any) {
                                     </View>
                                 ))}
 
-                                <View style={{ height: 100 }} />
+                                <View style={{ height: 180 }} />
                             </ScrollView>
 
-                            <View style={styles.modalFooter}>
+                            {/* Payment Summary in Modal */}
+                            <View style={styles.modalPaymentSection}>
+                                <View style={styles.modalPaymentSummary}>
+                                    <View style={styles.modalPaymentRow}>
+                                        <Text style={styles.modalPaymentLabel}>Order amount</Text>
+                                        <Text style={styles.modalPaymentValue}>₹{orderAmount.toFixed(2)}</Text>
+                                    </View>
+                                    <View style={styles.modalPaymentRow}>
+                                        <Text style={styles.modalPaymentLabel}>Convenience fee</Text>
+                                        <Text style={styles.modalPaymentValue}>₹{convenienceFee.toFixed(2)}</Text>
+                                    </View>
+                                    <View style={styles.modalPaymentDivider} />
+                                    <View style={styles.modalPaymentRow}>
+                                        <Text style={styles.modalPaymentTotalLabel}>Total</Text>
+                                        <Text style={styles.modalPaymentTotalValue}>₹{totalAmount.toFixed(2)}</Text>
+                                    </View>
+                                </View>
+
                                 <TouchableOpacity
-                                    style={styles.ctaButton}
+                                    style={styles.payButton}
                                     onPress={handleConfirm}
                                     disabled={loading}
                                 >
                                     {loading ? (
                                         <ActivityIndicator color="#fff" />
                                     ) : (
-                                        <Text style={styles.ctaText}>Confirm Booking</Text>
+                                        <>
+                                            <Text style={styles.payButtonText}>Pay ₹{totalAmount.toFixed(0)}</Text>
+                                            <Text style={styles.payButtonArrow}>›</Text>
+                                        </>
                                     )}
                                 </TouchableOpacity>
                             </View>
                         </KeyboardAvoidingView>
                     </SafeAreaView>
+                </Modal>
+
+                {/* Platform Fee Info Modal */}
+                <Modal
+                    visible={showPlatformFeeModal}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <TouchableOpacity
+                        style={styles.platformFeeOverlay}
+                        activeOpacity={1}
+                        onPress={() => setShowPlatformFeeModal(false)}
+                    >
+                        <TouchableOpacity
+                            activeOpacity={1}
+                            onPress={(e) => e.stopPropagation()}
+                            style={styles.platformFeeCardContainer}
+                        >
+                            <BlurView
+                                intensity={80}
+                                tint="dark"
+                                style={styles.platformFeeBlur}
+                            >
+                                <LinearGradient
+                                    colors={['rgba(139, 92, 246, 0.2)', 'rgba(88, 28, 135, 0.3)', 'rgba(49, 10, 101, 0.4)']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.platformFeeGradient}
+                                >
+                                    <View style={styles.platformFeeContent}>
+                                        <Text style={styles.platformFeeTitle}>Platform Fee</Text>
+                                        <Text style={styles.platformFeeDescription}>
+                                            This small fee helps us pay the bills so that we can keep Clubin running.
+                                        </Text>
+                                        <View style={styles.platformFeeDivider} />
+                                        <TouchableOpacity
+                                            style={styles.platformFeeButton}
+                                            onPress={() => setShowPlatformFeeModal(false)}
+                                        >
+                                            <Text style={styles.platformFeeButtonText}>OKAY</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </LinearGradient>
+                            </BlurView>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
                 </Modal>
             </SafeAreaView>
         </View>
@@ -436,13 +616,104 @@ const styles = StyleSheet.create({
         width: 32,
         textAlign: 'center',
     },
+    // Payment Summary styles
+    paymentSummary: {
+        marginTop: 24,
+    },
+    paymentTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#fff',
+        marginBottom: 12,
+    },
+    paymentCard: {
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
+    },
+    paymentRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    paymentRowLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    paymentLabel: {
+        fontSize: 15,
+        color: '#e5e5e5',
+    },
+    paymentLabelDotted: {
+        fontSize: 15,
+        color: '#e5e5e5',
+        textDecorationLine: 'underline',
+        textDecorationStyle: 'dotted',
+        textDecorationColor: '#737373',
+    },
+    paymentSubLabel: {
+        fontSize: 12,
+        color: '#737373',
+        marginLeft: 4,
+    },
+    paymentValue: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#fff',
+    },
+    paymentBreakdown: {
+        paddingLeft: 16,
+        paddingBottom: 8,
+        borderLeftWidth: 2,
+        borderLeftColor: 'rgba(139, 92, 246, 0.3)',
+        marginLeft: 8,
+        marginBottom: 8,
+    },
+    breakdownRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 6,
+    },
+    breakdownLabel: {
+        fontSize: 13,
+        color: '#a3a3a3',
+    },
+    breakdownValue: {
+        fontSize: 13,
+        color: '#a3a3a3',
+    },
+    paymentDivider: {
+        height: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        marginVertical: 8,
+    },
+    paymentRowTotal: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    paymentTotalLabel: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#fff',
+    },
+    paymentTotalValue: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#a855f7',
+    },
     infoCard: {
         flexDirection: 'row',
         gap: 12,
         backgroundColor: 'rgba(168, 85, 247, 0.1)',
         padding: 16,
         borderRadius: 16,
-        marginTop: 24,
+        marginTop: 16,
         borderWidth: 1,
         borderColor: 'rgba(168, 85, 247, 0.2)',
     },
@@ -561,5 +832,126 @@ const styles = StyleSheet.create({
         paddingBottom: 36,
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.05)',
+    },
+    // Modal Payment Section styles
+    modalPaymentSection: {
+        backgroundColor: '#171717',
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+        padding: 20,
+        paddingBottom: 36,
+    },
+    modalPaymentSummary: {
+        backgroundColor: 'rgba(60, 40, 80, 0.4)',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(139, 92, 246, 0.25)',
+    },
+    modalPaymentRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    modalPaymentLabel: {
+        fontSize: 14,
+        color: '#a3a3a3',
+    },
+    modalPaymentValue: {
+        fontSize: 14,
+        color: '#e5e5e5',
+    },
+    modalPaymentDivider: {
+        height: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        marginVertical: 8,
+    },
+    modalPaymentTotalLabel: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#fff',
+    },
+    modalPaymentTotalValue: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#a855f7',
+    },
+    payButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#a855f7',
+        paddingVertical: 18,
+        paddingHorizontal: 24,
+        borderRadius: 16,
+    },
+    payButtonText: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#fff',
+    },
+    payButtonArrow: {
+        fontSize: 24,
+        fontWeight: '400',
+        color: '#fff',
+        marginLeft: 8,
+    },
+    // Platform Fee Modal styles
+    platformFeeOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+    },
+    platformFeeCardContainer: {
+        width: '100%',
+        maxWidth: 340,
+        borderRadius: 24,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(167, 139, 250, 0.3)',
+    },
+    platformFeeBlur: {
+        overflow: 'hidden',
+    },
+    platformFeeGradient: {
+        padding: 24,
+    },
+    platformFeeContent: {
+        // Content container
+    },
+    platformFeeTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#c4b5fd',
+        marginBottom: 16,
+    },
+    platformFeeDescription: {
+        fontSize: 17,
+        color: '#e5e5e5',
+        lineHeight: 26,
+        marginBottom: 24,
+    },
+    platformFeeDivider: {
+        height: 1,
+        backgroundColor: 'rgba(167, 139, 250, 0.25)',
+        marginBottom: 16,
+    },
+    platformFeeButton: {
+        alignItems: 'center',
+        paddingVertical: 12,
+        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(167, 139, 250, 0.3)',
+    },
+    platformFeeButtonText: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#a855f7',
+        letterSpacing: 1,
     },
 });

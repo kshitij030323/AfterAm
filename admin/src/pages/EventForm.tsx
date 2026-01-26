@@ -27,6 +27,9 @@ export function EventForm() {
         gallery: [],
         price: 0,
         priceLabel: 'Free Entry',
+        stagPrice: 0,
+        couplePrice: 0,
+        ladiesPrice: 0,
         date: new Date().toISOString().split('T')[0],
         startTime: '20:00',
         endTime: '01:00',
@@ -54,6 +57,9 @@ export function EventForm() {
                         gallery: event.gallery || [],
                         price: event.price,
                         priceLabel: event.priceLabel,
+                        stagPrice: event.stagPrice ?? 0,
+                        couplePrice: event.couplePrice ?? 0,
+                        ladiesPrice: event.ladiesPrice ?? 0,
                         date: event.date.split('T')[0],
                         startTime: event.startTime,
                         endTime: event.endTime,
@@ -365,6 +371,43 @@ export function EventForm() {
                             />
                         </div>
                     </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-neutral-400 mb-2">Stag Entry (₹)</label>
+                            <input
+                                type="number"
+                                value={form.stagPrice}
+                                onChange={(e) => updateField('stagPrice', Number(e.target.value))}
+                                className="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                min="0"
+                                placeholder="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-neutral-400 mb-2">Couple Entry (₹)</label>
+                            <input
+                                type="number"
+                                value={form.couplePrice}
+                                onChange={(e) => updateField('couplePrice', Number(e.target.value))}
+                                className="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                min="0"
+                                placeholder="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-neutral-400 mb-2">Ladies Entry (₹)</label>
+                            <input
+                                type="number"
+                                value={form.ladiesPrice}
+                                onChange={(e) => updateField('ladiesPrice', Number(e.target.value))}
+                                className="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                min="0"
+                                placeholder="0"
+                            />
+                        </div>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-1">Set to 0 for free entry. These prices are shown to users when booking tickets.</p>
 
                     {/* Banner Image (for cards) */}
                     <div>
