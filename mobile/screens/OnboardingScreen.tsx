@@ -12,13 +12,16 @@ import {
     Image,
     Platform,
 } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppBackground } from '../components/AppBackground';
 
 const clubinLogo = require('../assets/clubin-logo.png');
 
 const { width, height } = Dimensions.get('window');
+
+const VIDEO_URL = 'https://customer-cbeadsgr09pnsezs.cloudflarestream.com/257c7359efd4b4aaebcc03aa8fc78a36/manifest/video.m3u8';
+const THUMBNAIL_URL = 'https://customer-cbeadsgr09pnsezs.cloudflarestream.com/257c7359efd4b4aaebcc03aa8fc78a36/thumbnails/thumbnail.jpg';
 
 const ONBOARDING_DATA = [
     {
@@ -32,32 +35,13 @@ const ONBOARDING_DATA = [
         id: '2',
         subtitle: 'FREE GUESTLISTS & PRIORITY ENTRY',
         titleLine1: 'Your Name.',
-        titleLine2: 'On the List. Instantly.',
+        titleLine2: 'On the List.\nInstantly.',
         description: 'Join guestlists in seconds, skip the hassle,\nand walk in like a VIP.',
     },
 ];
 
 interface OnboardingScreenProps {
     onComplete: () => void;
-}
-
-// Glass card with 3D border effect
-function GlassCard3D({ children, style }: { children: React.ReactNode; style?: any }) {
-    return (
-        <View style={[styles.glassCardOuter, style]}>
-            <View style={styles.glassCardShadow} />
-            <LinearGradient
-                colors={['rgba(168, 85, 247, 0.4)', 'rgba(139, 92, 246, 0.2)', 'rgba(88, 28, 135, 0.1)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.glassCardBorder}
-            >
-                <View style={styles.glassCardInner}>
-                    {children}
-                </View>
-            </LinearGradient>
-        </View>
-    );
 }
 
 // Animated text content component with staggered animations
@@ -68,7 +52,6 @@ function AnimatedTextContent({ item, isActive }: { item: typeof ONBOARDING_DATA[
     const titleLine2Opacity = useRef(new Animated.Value(0)).current;
     const titleLine2TranslateY = useRef(new Animated.Value(12)).current;
     const titleLine2Scale = useRef(new Animated.Value(0.98)).current;
-    const titleLine2Glow = useRef(new Animated.Value(0)).current;
     const descriptionOpacity = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -86,17 +69,15 @@ function AnimatedTextContent({ item, isActive }: { item: typeof ONBOARDING_DATA[
         titleLine2Opacity.setValue(0);
         titleLine2TranslateY.setValue(12);
         titleLine2Scale.setValue(0.98);
-        titleLine2Glow.setValue(0);
         descriptionOpacity.setValue(0);
     };
 
     const runStaggeredAnimation = () => {
         resetAnimations();
 
-        // Stagger delay between elements
         const staggerDelay = 120;
 
-        // 1. Subtitle fades in first (subtle)
+        // 1. Subtitle fades in
         Animated.timing(subtitleOpacity, {
             toValue: 1,
             duration: 400,
@@ -122,7 +103,7 @@ function AnimatedTextContent({ item, isActive }: { item: typeof ONBOARDING_DATA[
             ]).start();
         }, staggerDelay);
 
-        // 3. Title line 2 with scale + glow pulse
+        // 3. Title line 2 with scale
         setTimeout(() => {
             Animated.parallel([
                 Animated.timing(titleLine2Opacity, {
@@ -144,25 +125,9 @@ function AnimatedTextContent({ item, isActive }: { item: typeof ONBOARDING_DATA[
                     useNativeDriver: true,
                 }),
             ]).start();
-
-            // Subtle glow pulse
-            Animated.sequence([
-                Animated.timing(titleLine2Glow, {
-                    toValue: 1,
-                    duration: 400,
-                    easing: Easing.out(Easing.cubic),
-                    useNativeDriver: true,
-                }),
-                Animated.timing(titleLine2Glow, {
-                    toValue: 0.6,
-                    duration: 600,
-                    easing: Easing.inOut(Easing.cubic),
-                    useNativeDriver: true,
-                }),
-            ]).start();
         }, staggerDelay * 2);
 
-        // 4. Description fades in last with reduced opacity
+        // 4. Description fades in last
         setTimeout(() => {
             Animated.timing(descriptionOpacity, {
                 toValue: 1,
@@ -174,13 +139,13 @@ function AnimatedTextContent({ item, isActive }: { item: typeof ONBOARDING_DATA[
     };
 
     return (
-        <>
+        <View style={styles.textContent}>
             {/* Subtitle */}
             <Animated.Text style={[styles.subtitle, { opacity: subtitleOpacity }]}>
                 {item.subtitle}
             </Animated.Text>
 
-            {/* Title Line 1 */}
+            {/* Title Line 1 - Bold sans-serif */}
             <Animated.Text
                 style={[
                     styles.titleLine1,
@@ -193,7 +158,7 @@ function AnimatedTextContent({ item, isActive }: { item: typeof ONBOARDING_DATA[
                 {item.titleLine1}
             </Animated.Text>
 
-            {/* Title Line 2 - with glow effect */}
+            {/* Title Line 2 - Instrument Serif Italic */}
             <Animated.View
                 style={[
                     styles.titleLine2Container,
@@ -215,7 +180,7 @@ function AnimatedTextContent({ item, isActive }: { item: typeof ONBOARDING_DATA[
             <Animated.Text style={[styles.description, { opacity: descriptionOpacity }]}>
                 {item.description}
             </Animated.Text>
-        </>
+        </View>
     );
 }
 
@@ -223,6 +188,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
     const scrollX = useRef(new Animated.Value(0)).current;
+    const videoRef = useRef<Video>(null);
 
     const handleNext = async () => {
         if (currentIndex < ONBOARDING_DATA.length - 1) {
@@ -250,11 +216,9 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
     const renderPage = ({ item, index }: { item: typeof ONBOARDING_DATA[0]; index: number }) => (
         <View style={styles.page}>
-            <AppBackground />
-
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.contentContainer}>
-                    {/* Logo - stays fixed */}
+                    {/* Logo */}
                     <View style={styles.logoContainer}>
                         <Image
                             source={clubinLogo}
@@ -263,20 +227,16 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                         />
                     </View>
 
-                    {/* Reduced spacer - moves content higher */}
+                    {/* Spacer to push text content down */}
                     <View style={styles.spacer} />
 
-                    {/* Main Content Card - expanded */}
-                    <View style={styles.contentCard}>
-                        <GlassCard3D>
-                            <AnimatedTextContent
-                                item={item}
-                                isActive={index === currentIndex}
-                            />
-                        </GlassCard3D>
-                    </View>
+                    {/* Main text content */}
+                    <AnimatedTextContent
+                        item={item}
+                        isActive={index === currentIndex}
+                    />
 
-                    {/* Page Indicators - stays fixed */}
+                    {/* Page Indicators */}
                     <View style={styles.indicatorContainer}>
                         {ONBOARDING_DATA.map((_, i) => (
                             <View
@@ -289,7 +249,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                         ))}
                     </View>
 
-                    {/* Button - stays fixed */}
+                    {/* Button */}
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
                             style={styles.nextButtonOuter}
@@ -328,6 +288,33 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
     return (
         <View style={styles.container}>
+            {/* Video Background - shared across all pages */}
+            <Video
+                ref={videoRef}
+                source={{ uri: VIDEO_URL }}
+                posterSource={{ uri: THUMBNAIL_URL }}
+                usePoster={true}
+                posterStyle={styles.videoPoster}
+                style={styles.backgroundVideo}
+                resizeMode={ResizeMode.COVER}
+                shouldPlay
+                isLooping
+                isMuted
+            />
+            {/* Dark overlay gradient for readability */}
+            <LinearGradient
+                colors={[
+                    'rgba(0, 0, 0, 0.3)',
+                    'rgba(0, 0, 0, 0.1)',
+                    'rgba(0, 0, 0, 0.2)',
+                    'rgba(0, 0, 0, 0.7)',
+                    'rgba(0, 0, 0, 0.85)',
+                ]}
+                locations={[0, 0.2, 0.4, 0.7, 1]}
+                style={styles.videoOverlay}
+            />
+
+            {/* Swipeable pages on top */}
             <FlatList
                 ref={flatListRef}
                 data={ONBOARDING_DATA}
@@ -343,6 +330,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                     { useNativeDriver: false }
                 )}
                 scrollEventThrottle={16}
+                style={styles.flatList}
             />
         </View>
     );
@@ -353,6 +341,30 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#0a0a12',
     },
+    backgroundVideo: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width,
+        height,
+    },
+    videoPoster: {
+        width,
+        height,
+        resizeMode: 'cover',
+    },
+    videoOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
+    flatList: {
+        flex: 1,
+    },
     page: {
         width,
         height,
@@ -362,7 +374,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
-        paddingHorizontal: 24,
+        paddingHorizontal: 28,
         paddingBottom: 20,
     },
     logoContainer: {
@@ -374,33 +386,10 @@ const styles = StyleSheet.create({
         height: 80,
     },
     spacer: {
-        flex: 0.4, // Reduced from 1 to move content higher
+        flex: 1,
     },
-    contentCard: {
-        marginBottom: 28,
-    },
-    glassCardOuter: {
-        position: 'relative',
-    },
-    glassCardShadow: {
-        position: 'absolute',
-        top: 4,
-        left: 4,
-        right: -4,
-        bottom: -4,
-        borderRadius: 28,
-        backgroundColor: 'rgba(139, 92, 246, 0.12)',
-    },
-    glassCardBorder: {
-        borderRadius: 28,
-        padding: 2,
-    },
-    glassCardInner: {
-        backgroundColor: 'rgba(10, 10, 18, 0.95)',
-        borderRadius: 26,
-        paddingVertical: 32, // Increased padding for larger card
-        paddingHorizontal: 28,
-        minHeight: 220, // Minimum height for more presence
+    textContent: {
+        marginBottom: 32,
     },
     subtitle: {
         fontSize: 11,
@@ -410,31 +399,28 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     titleLine1: {
-        fontSize: 36, // Larger headline
+        fontSize: 42,
         fontWeight: '800',
         color: '#fff',
-        lineHeight: 44, // Increased line height
+        lineHeight: 50,
     },
     titleLine2Container: {
         marginBottom: 20,
     },
     titleLine2: {
-        fontSize: 36, // Larger headline
-        fontWeight: '800',
-        color: '#a855f7',
-        lineHeight: 44, // Increased line height
-        textShadowColor: 'rgba(168, 85, 247, 0.4)',
-        textShadowOffset: { width: 0, height: 0 },
-        textShadowRadius: 10,
+        fontSize: 42,
+        fontFamily: 'InstrumentSerif-Italic',
+        fontStyle: 'italic',
+        color: '#c4b5fd',
+        lineHeight: 50,
     },
     description: {
-        fontSize: 14, // Slightly smaller
+        fontSize: 14,
         color: 'rgba(255, 255, 255, 0.55)',
         lineHeight: 21,
     },
     indicatorContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
         gap: 8,
         marginBottom: 24,
     },
@@ -460,7 +446,7 @@ const styles = StyleSheet.create({
         padding: 2,
     },
     nextButtonInner: {
-        backgroundColor: 'rgba(10, 10, 18, 0.98)',
+        backgroundColor: 'rgba(10, 10, 18, 0.85)',
         borderRadius: 48,
         paddingVertical: 16,
         paddingHorizontal: 24,

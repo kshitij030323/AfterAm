@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -8,6 +8,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Home, Ticket, User, MapPinPlus } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Font from 'expo-font';
 
 import { AuthProvider, useAuth } from './lib/auth';
 import { HomeScreen } from './screens/HomeScreen';
@@ -189,10 +190,23 @@ function AppNavigator() {
   const { user } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
     checkOnboardingStatus();
+    loadFonts();
   }, []);
+
+  const loadFonts = async () => {
+    try {
+      await Font.loadAsync({
+        'InstrumentSerif-Italic': require('./assets/fonts/InstrumentSerif-Italic.ttf'),
+      });
+    } catch (e) {
+      // Font loading failed, continue with system fonts
+    }
+    setFontsLoaded(true);
+  };
 
   const checkOnboardingStatus = async () => {
     try {
