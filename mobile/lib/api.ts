@@ -65,6 +65,15 @@ export const getMyBookings = () => fetchApi<Booking[]>('/bookings/my');
 
 export const getBooking = (id: string) => fetchApi<Booking>(`/bookings/${id}`);
 
+// Notifications
+export const registerDeviceToken = (token: string) =>
+    fetchApi<{ message: string }>('/notifications/register-token', { method: 'POST', body: { token } });
+
+export const trackAbandonedBooking = (eventId: string) =>
+    fetchApi<{ message: string }>('/notifications/abandoned-booking', { method: 'POST', body: { eventId } });
+
+export const cancelAbandonedBooking = (eventId: string) =>
+    fetchApi<{ message: string }>(`/notifications/abandoned-booking/${eventId}`, { method: 'DELETE' });
 // Types
 export interface User {
     id: string;
