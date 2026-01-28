@@ -27,6 +27,8 @@ interface EventForm {
     guestlistStatus: 'open' | 'closing' | 'closed';
     guestlistLimit: number | null;
     closingThreshold: number | null;
+    guestlistCloseTime: string | null;
+    guestlistCloseOnStart: boolean;
     featured: boolean;
 }
 
@@ -60,6 +62,8 @@ export function EventForm() {
         guestlistStatus: 'open',
         guestlistLimit: null,
         closingThreshold: null,
+        guestlistCloseTime: null,
+        guestlistCloseOnStart: true,
         featured: false,
     });
 
@@ -89,6 +93,8 @@ export function EventForm() {
                             guestlistStatus: event.guestlistStatus || 'open',
                             guestlistLimit: event.guestlistLimit || null,
                             closingThreshold: event.closingThreshold || null,
+                            guestlistCloseTime: event.guestlistCloseTime || null,
+                            guestlistCloseOnStart: event.guestlistCloseOnStart ?? true,
                             featured: event.featured,
                         });
                     }
@@ -507,6 +513,27 @@ export function EventForm() {
                                 placeholder="Spots remaining to show 'closing'"
                                 min={1}
                             />
+                        </div>
+                    </div>
+
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label>Close Guestlist At</label>
+                            <input
+                                type="time"
+                                value={form.guestlistCloseTime ?? ''}
+                                onChange={(e) => updateField('guestlistCloseTime', e.target.value || null)}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={form.guestlistCloseOnStart}
+                                    onChange={(e) => updateField('guestlistCloseOnStart', e.target.checked)}
+                                />
+                                <span>Close on Event Start</span>
+                            </label>
                         </div>
                     </div>
                 </section>

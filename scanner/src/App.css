@@ -850,6 +850,28 @@ body {
   cursor: not-allowed;
 }
 
+/* Checkbox Label */
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding-top: 28px;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--purple);
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
 .spin {
   animation: spin 1s linear infinite;
 }
