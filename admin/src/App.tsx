@@ -9,6 +9,7 @@ import { EventBookings } from './pages/EventBookings';
 import { Clubs } from './pages/Clubs';
 import { ClubForm } from './pages/ClubForm';
 import { ClubEvents } from './pages/ClubEvents';
+import { Notifications } from './pages/Notifications';
 import { Layout } from './components/Layout';
 
 interface AuthContextType {
@@ -104,6 +105,7 @@ export default function App() {
                                     <Route path="/clubs/new" element={<ClubForm />} />
                                     <Route path="/clubs/:id/edit" element={<ClubForm />} />
                                     <Route path="/clubs/:id/events" element={<ClubEvents />} />
+                                    <Route path="/notifications" element={<Notifications />} />
                                 </Routes>
                             </Layout>
                         </ProtectedRoute>

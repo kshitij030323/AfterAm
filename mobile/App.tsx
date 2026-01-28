@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Font from 'expo-font';
 
 import { AuthProvider, useAuth } from './lib/auth';
+import { registerTokenWithBackend, addNotificationListeners } from './lib/notifications';
 import { HomeScreen } from './screens/HomeScreen';
 import { EventDetailScreen } from './screens/EventDetailScreen';
 import { GuestlistScreen } from './screens/GuestlistScreen';
@@ -196,6 +197,36 @@ function AppNavigator() {
     checkOnboardingStatus();
     loadFonts();
   }, []);
+
+  // Register for push notifications when user logs in
+  useEffect(() => {
+    if (user) {
+      // Register device token with backend
+      registerTokenWithBackend().then((success) => {
+        if (success) {
+          console.log('Push notifications registered successfully');
+        }
+      });
+
+      // Set up notification listeners
+      const unsubscribe = addNotificationListeners(
+        (notification) => {
+          // Handle notification received in foreground
+          console.log('Notification received:', notification.request.content.title);
+        },
+        (response) => {
+          // Handle notification tap
+          const data = response.notification.request.content.data;
+          if (data?.eventId) {
+            // Navigate to event detail if notification has eventId
+            console.log('Navigate to event:', data.eventId);
+          }
+        }
+      );
+
+      return unsubscribe;
+    }
+  }, [user]);
 
   const loadFonts = async () => {
     try {

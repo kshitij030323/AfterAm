@@ -168,3 +168,55 @@ export const getClubEvents = (clubId: string) =>
     fetchApi<Event[]>(`/clubs/${clubId}/events`);
 export const generateClubCredentials = (id: string) =>
     fetchApi<{ email: string; password: string }>(`/clubs/${id}/credentials`, { method: 'POST' });
+
+// Notifications
+export interface NotificationUser {
+    id: string;
+    name: string;
+    phone: string;
+    email: string | null;
+    hasDeviceToken: boolean;
+    createdAt: string;
+    guestlistCount: number;
+}
+
+export interface NotificationHistory {
+    id: string;
+    userId: string | null;
+    title: string;
+    body: string;
+    data?: Record<string, string>;
+    sentAt: string;
+    sentBy: string | null;
+    type: string;
+    eventId: string | null;
+    success: boolean;
+    error: string | null;
+    user?: { name: string; phone: string } | null;
+    event?: { title: string } | null;
+}
+
+export interface NotificationHistoryResponse {
+    notifications: NotificationHistory[];
+    total: number;
+    limit: number;
+    offset: number;
+}
+
+export const getNotificationUsers = () =>
+    fetchApi<NotificationUser[]>('/notifications/users');
+
+export const sendNotification = (data: { userIds: string[]; title: string; body: string; eventId?: string }) =>
+    fetchApi<{ message: string; success: number; failed: number }>('/notifications/send', { method: 'POST', body: data });
+
+export const sendNotificationToAll = (data: { title: string; body: string; eventId?: string }) =>
+    fetchApi<{ message: string; success: number; failed: number }>('/notifications/send-all', { method: 'POST', body: data });
+
+export const getNotificationHistory = (params?: { limit?: number; offset?: number; type?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.limit) query.append('limit', params.limit.toString());
+    if (params?.offset) query.append('offset', params.offset.toString());
+    if (params?.type) query.append('type', params.type);
+    const queryString = query.toString();
+    return fetchApi<NotificationHistoryResponse>(`/notifications/history${queryString ? `?${queryString}` : ''}`);
+};

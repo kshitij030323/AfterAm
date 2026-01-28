@@ -10,16 +10,19 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String?  @unique
-  password  String?
-  name      String
-  phone     String   @unique
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  email       String?  @unique
+  password    String?
+  name        String
+  phone       String   @unique
+  isAdmin     Boolean  @default(false)
+  deviceToken String?  // FCM device token for push notifications
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  bookings Booking[]
+  bookings           Booking[]
+  notifications      Notification[]
+  abandonedBookings  AbandonedBooking[]
 }
 
 model Club {
@@ -69,8 +72,10 @@ model Event {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  clubRef  Club?     @relation(fields: [clubId], references: [id], onDelete: SetNull)
-  bookings Booking[]
+  clubRef           Club?              @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  bookings          Booking[]
+  notifications     Notification[]
+  abandonedBookings AbandonedBooking[]
 }
 
 model Booking {
@@ -90,4 +95,33 @@ model Booking {
   user          User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   event         Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   scannedByClub Club? @relation("ScannedBy", fields: [scannedByClubId], references: [id], onDelete: SetNull)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String?  // null means broadcast to all users
+  title     String
+  body      String
+  data      Json?    // Additional data payload
+  sentAt    DateTime @default(now())
+  sentBy    String?  // Admin ID who sent the notification
+  type      String   @default("manual") // "manual", "abandoned_booking", "system"
+  eventId   String?  // Optional: associated event for context
+  success   Boolean  @default(true)
+  error     String?  // Error message if failed
+
+  user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  event Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+}
+
+model AbandonedBooking {
+  id            String    @id @default(uuid())
+  userId        String
+  eventId       String
+  abandonedAt   DateTime  @default(now())
+  notificationSentAt DateTime? // Track when reminder was sent
+  notificationSent   Boolean   @default(false)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }

@@ -21,6 +21,7 @@ import { ChevronLeft, Info, Minus, Plus, X, ChevronDown, ChevronUp } from 'lucid
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
 import { AppBackground } from '../components/AppBackground';
+import { trackAbandonedBooking, cancelAbandonedBooking } from '../lib/api';
 
 interface Event {
     id: string;
@@ -122,6 +123,20 @@ export function GuestlistScreen({ route, navigation }: any) {
         setShowNamesModal(true);
     };
 
+    // Track abandoned booking when user closes the names modal without completing
+    const handleCloseNamesModal = async () => {
+        setShowNamesModal(false);
+
+        // Track abandoned booking - notification will be sent after 2 minutes
+        try {
+            await trackAbandonedBooking(event.id);
+            console.log('Abandoned booking tracked for event:', event.id);
+        } catch (error) {
+            console.log('Failed to track abandoned booking:', error);
+            // Silently fail - this is a non-critical feature
+        }
+    };
+
     const updateGuestName = (index: number, name: string) => {
         setGuests(prev => {
             const updated = [...prev];
@@ -172,6 +187,14 @@ export function GuestlistScreen({ route, navigation }: any) {
             }
 
             const booking = await response.json();
+
+            // Clear abandoned booking tracking since booking was completed
+            try {
+                await cancelAbandonedBooking(event.id);
+            } catch (error) {
+                // Silently fail - non-critical
+            }
+
             setShowNamesModal(false);
             navigation.replace('Confirmation', { booking });
         } catch (err) {
@@ -386,7 +409,7 @@ export function GuestlistScreen({ route, navigation }: any) {
                             style={{ flex: 1 }}
                         >
                             <View style={styles.modalHeader}>
-                                <TouchableOpacity onPress={() => setShowNamesModal(false)}>
+                                <TouchableOpacity onPress={handleCloseNamesModal}>
                                     <X color="#a3a3a3" size={24} />
                                 </TouchableOpacity>
                                 <Text style={styles.modalTitle}>Enter Guest Names</Text>

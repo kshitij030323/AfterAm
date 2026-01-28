@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, LogOut, Building2 } from 'lucide-react';
+import { LayoutDashboard, Calendar, LogOut, Building2, Bell } from 'lucide-react';
 import { useAuth } from '../App';
 
 interface LayoutProps {
@@ -15,6 +15,7 @@ export function Layout({ children }: LayoutProps) {
         { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/events', icon: Calendar, label: 'Events' },
         { path: '/clubs', icon: Building2, label: 'Clubs' },
+        { path: '/notifications', icon: Bell, label: 'Notifications' },
     ];
 
     return (

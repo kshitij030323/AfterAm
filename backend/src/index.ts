@@ -7,6 +7,8 @@ import { bookingsRouter } from './routes/bookings.js';
 import { clubsRouter } from './routes/clubs.js';
 import { scannerRouter } from './routes/scanner.js';
 import uploadRouter, { checkR2Connection } from './routes/upload.js';
+import notificationsRouter from './routes/notifications.js';
+import { startSchedulers } from './services/scheduler.js';
 
 dotenv.config();
 
@@ -35,6 +37,7 @@ app.use('/api/bookings', bookingsRouter);
 app.use('/api/clubs', clubsRouter);
 app.use('/api/scanner', scannerRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/notifications', notificationsRouter);
 
 // Error handler
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -48,4 +51,8 @@ app.listen(PORT, async () => {
 
     // Check R2 connection at startup
     await checkR2Connection();
+
+    // Start notification schedulers
+    startSchedulers();
+    console.log(`📬 Notification schedulers started`);
 });
