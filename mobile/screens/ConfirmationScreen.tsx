@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
     View,
     Text,
@@ -7,14 +7,12 @@ import {
     TouchableOpacity,
     ScrollView,
     Alert,
-    ActivityIndicator,
     Image,
 } from 'react-native';
-import { CheckCircle, Clock, Calendar, Share2, XCircle } from 'lucide-react-native';
+import { CheckCircle, Clock, Calendar, Share2 } from 'lucide-react-native';
 import QRCode from 'react-native-qrcode-svg';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppBackground } from '../components/AppBackground';
 
 const clubinLogo = require('../assets/clubin-confirmation-logo.png');
@@ -42,7 +40,6 @@ export function ConfirmationScreen({ route, navigation }: any) {
     const { booking } = route.params as { booking: LocalBooking };
     const event = booking.event;
     const viewShotRef = useRef<ViewShot>(null);
-    const [cancelling, setCancelling] = useState(false);
 
     const totalGuests = booking.couples * 2 + booking.ladies + booking.stags;
 
@@ -77,58 +74,6 @@ export function ConfirmationScreen({ route, navigation }: any) {
             console.error('Error sharing ticket:', error);
             Alert.alert('Error', 'Failed to share ticket. Please try again.');
         }
-    };
-
-    const cancelBooking = async () => {
-        Alert.alert(
-            'Cancel Booking',
-            'Are you sure you want to cancel this booking? This action cannot be undone.',
-            [
-                { text: 'Keep Booking', style: 'cancel' },
-                {
-                    text: 'Cancel Booking',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setCancelling(true);
-                        try {
-                            const token = await AsyncStorage.getItem('afterhour_token');
-                            const response = await fetch(`https://api.clubin.info/api/bookings/${booking.id}`, {
-                                method: 'DELETE',
-                                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-                            });
-
-                            if (!response.ok) {
-                                throw new Error('Failed to cancel booking');
-                            }
-
-                            // Remove from local storage
-                            const storedBookings = await AsyncStorage.getItem('afterhour_bookings');
-                            if (storedBookings) {
-                                const bookings = JSON.parse(storedBookings);
-                                const updatedBookings = bookings.filter((b: LocalBooking) => b.id !== booking.id);
-                                await AsyncStorage.setItem('afterhour_bookings', JSON.stringify(updatedBookings));
-                            }
-
-                            // Update guest counts
-                            const counts = JSON.parse(await AsyncStorage.getItem('afterhour_guest_counts') || '{}');
-                            if (counts[booking.eventId]) {
-                                delete counts[booking.eventId];
-                                await AsyncStorage.setItem('afterhour_guest_counts', JSON.stringify(counts));
-                            }
-
-                            Alert.alert('Booking Cancelled', 'Your booking has been successfully cancelled.', [
-                                { text: 'OK', onPress: () => navigation.navigate('Home', { screen: 'HomeList' }) }
-                            ]);
-                        } catch (error) {
-                            console.error('Error cancelling booking:', error);
-                            Alert.alert('Error', 'Failed to cancel booking. Please try again.');
-                        } finally {
-                            setCancelling(false);
-                        }
-                    }
-                }
-            ]
-        );
     };
 
     return (
@@ -223,21 +168,6 @@ export function ConfirmationScreen({ route, navigation }: any) {
                         <TouchableOpacity style={styles.secondaryButton} onPress={shareTicket}>
                             <Share2 color="#fff" size={18} />
                             <Text style={styles.secondaryButtonText}>Share Ticket</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.cancelButton}
-                            onPress={cancelBooking}
-                            disabled={cancelling}
-                        >
-                            {cancelling ? (
-                                <ActivityIndicator color="#ef4444" size="small" />
-                            ) : (
-                                <>
-                                    <XCircle color="#ef4444" size={18} />
-                                    <Text style={styles.cancelButtonText}>Cancel Booking</Text>
-                                </>
-                            )}
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -450,21 +380,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         color: '#fff',
-    },
-    cancelButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        backgroundColor: 'transparent',
-        paddingVertical: 16,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: 'rgba(239, 68, 68, 0.3)',
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#ef4444',
     },
 });

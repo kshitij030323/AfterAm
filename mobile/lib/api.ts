@@ -65,9 +65,6 @@ export const getMyBookings = () => fetchApi<Booking[]>('/bookings/my');
 
 export const getBooking = (id: string) => fetchApi<Booking>(`/bookings/${id}`);
 
-export const cancelBooking = (id: string) =>
-    fetchApi<{ message: string }>(`/bookings/${id}`, { method: 'DELETE' });
-
 // Types
 export interface User {
     id: string;
