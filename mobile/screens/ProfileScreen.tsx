@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -13,20 +13,72 @@ import {
     Linking,
     Platform,
     StatusBar,
+    ActivityIndicator,
 } from 'react-native';
 import { ChevronRight, LogOut, X, Bell, User, HelpCircle, FileText, Shield } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../lib/auth';
 import { AppBackground } from '../components/AppBackground';
+import { registerTokenWithBackend, checkNotificationPermissions } from '../lib/notifications';
 
 export function ProfileScreen() {
     const { user, logout, updateUser } = useAuth();
     const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [showNotificationsModal, setShowNotificationsModal] = useState(false);
     const [editName, setEditName] = useState(user?.name || '');
-    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [notificationsLoading, setNotificationsLoading] = useState(false);
     const [eventReminders, setEventReminders] = useState(true);
     const [promotions, setPromotions] = useState(false);
+
+    // Check actual notification permission status on mount and when modal opens
+    useEffect(() => {
+        if (showNotificationsModal) {
+            checkNotificationPermissions().then(setNotificationsEnabled);
+        }
+    }, [showNotificationsModal]);
+
+    // Handle notification toggle
+    const handleNotificationToggle = async (enabled: boolean) => {
+        if (enabled) {
+            setNotificationsLoading(true);
+            try {
+                // Request permissions and register token with backend
+                const success = await registerTokenWithBackend(true); // Force re-register
+                if (success) {
+                    setNotificationsEnabled(true);
+                    Alert.alert('Success', 'Push notifications enabled! You will now receive booking updates.');
+                } else {
+                    // Permission was denied or failed
+                    setNotificationsEnabled(false);
+                    Alert.alert(
+                        'Permission Required',
+                        'Please enable notifications in your device settings to receive booking updates.',
+                        [
+                            { text: 'Cancel', style: 'cancel' },
+                            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+                        ]
+                    );
+                }
+            } catch (error) {
+                console.error('Error enabling notifications:', error);
+                setNotificationsEnabled(false);
+                Alert.alert('Error', 'Failed to enable notifications. Please try again.');
+            } finally {
+                setNotificationsLoading(false);
+            }
+        } else {
+            // User wants to disable notifications - guide them to settings
+            Alert.alert(
+                'Disable Notifications',
+                'To disable push notifications, please go to your device settings.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Open Settings', onPress: () => Linking.openSettings() },
+                ]
+            );
+        }
+    };
 
     // Format phone for display
     const formatPhone = (phone: string) => {
@@ -270,12 +322,16 @@ export function ProfileScreen() {
                                     <Text style={styles.settingLabel}>Push Notifications</Text>
                                     <Text style={styles.settingDescription}>Receive booking confirmations</Text>
                                 </View>
-                                <Switch
-                                    value={notificationsEnabled}
-                                    onValueChange={setNotificationsEnabled}
-                                    trackColor={{ false: '#333', true: '#7c3aed' }}
-                                    thumbColor={notificationsEnabled ? '#a855f7' : '#666'}
-                                />
+                                {notificationsLoading ? (
+                                    <ActivityIndicator size="small" color="#a855f7" />
+                                ) : (
+                                    <Switch
+                                        value={notificationsEnabled}
+                                        onValueChange={handleNotificationToggle}
+                                        trackColor={{ false: '#333', true: '#7c3aed' }}
+                                        thumbColor={notificationsEnabled ? '#a855f7' : '#666'}
+                                    />
+                                )}
                             </View>
 
                             <View style={styles.settingRow}>
@@ -308,10 +364,9 @@ export function ProfileScreen() {
                                 style={styles.saveButton}
                                 onPress={() => {
                                     setShowNotificationsModal(false);
-                                    Alert.alert('Saved', 'Notification preferences updated!');
                                 }}
                             >
-                                <Text style={styles.saveButtonText}>Save Preferences</Text>
+                                <Text style={styles.saveButtonText}>Done</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
