@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Users, Plus } from 'lucide-react';
+import { Calendar, Clock, Users, Plus, Edit } from 'lucide-react';
 import { useApi } from '../App';
 
 interface Event {
@@ -83,6 +83,9 @@ export function Dashboard() {
                                 </div>
                             </div>
                             <div className="event-actions">
+                                <Link to={`/events/${event.id}/edit`} className="btn btn-sm btn-outline">
+                                    <Edit size={16} /> Edit Event
+                                </Link>
                                 <Link to={`/events/${event.id}/guestlist`} className="btn btn-sm btn-outline">
                                     <Users size={16} /> View Guestlist
                                 </Link>
