@@ -65,18 +65,20 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
 }
 
 // Register device token with the backend
-export async function registerTokenWithBackend(): Promise<boolean> {
+export async function registerTokenWithBackend(forceRegister: boolean = false): Promise<boolean> {
   try {
     const token = await registerForPushNotificationsAsync();
     if (!token) {
       return false;
     }
 
-    // Check if token is already registered
-    const storedToken = await AsyncStorage.getItem('pushToken');
-    if (storedToken === token) {
-      console.log('Token already registered');
-      return true;
+    // Check if token is already registered (skip if force registering)
+    if (!forceRegister) {
+      const storedToken = await AsyncStorage.getItem('pushToken');
+      if (storedToken === token) {
+        console.log('Token already registered');
+        return true;
+      }
     }
 
     // Register with backend
@@ -86,6 +88,27 @@ export async function registerTokenWithBackend(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('Failed to register push token:', error);
+    return false;
+  }
+}
+
+// Check if push notifications are currently enabled
+export async function checkNotificationPermissions(): Promise<boolean> {
+  const { status } = await Notifications.getPermissionsAsync();
+  return status === 'granted';
+}
+
+// Unregister device token (clear from backend)
+export async function unregisterTokenFromBackend(): Promise<boolean> {
+  try {
+    // Clear the locally stored token
+    await AsyncStorage.removeItem('pushToken');
+    // Optionally: call backend to clear the token
+    // For now, we'll just clear locally - the token will become invalid anyway
+    console.log('Push token cleared locally');
+    return true;
+  } catch (error) {
+    console.error('Failed to unregister push token:', error);
     return false;
   }
 }
